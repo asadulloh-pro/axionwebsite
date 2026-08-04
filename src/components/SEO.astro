@@ -1,0 +1,68 @@
+---
+import { getAlternateUrls } from '../lib/paths';
+import type { Locale } from '../i18n/types';
+
+interface Props {
+  title: string;
+  description: string;
+  locale: Locale;
+  ogLocale: string;
+  canonicalPath: string;
+  image?: string;
+  type?: string;
+  jsonLd?: Record<string, unknown> | Record<string, unknown>[];
+}
+
+const {
+  title,
+  description,
+  locale,
+  ogLocale,
+  canonicalPath,
+  image = '/og-default.png',
+  type = 'website',
+  jsonLd,
+} = Astro.props;
+
+const site = Astro.site?.toString().replace(/\/$/, '') ?? 'https://axionlab.uz';
+const canonical = `${site}${canonicalPath === '/' ? '' : canonicalPath}`;
+const ogImage = image.startsWith('http') ? image : `${site}${image}`;
+const alternates = getAlternateUrls(canonicalPath, site);
+const jsonLdArray = jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd]) : [];
+---
+
+<title>{title}</title>
+<meta name="description" content={description} />
+<link rel="canonical" href={canonical} />
+{alternates.map(({ locale: altLocale, href }) => (
+  <link rel="alternate" hreflang={altLocale === 'uz' ? 'uz' : altLocale} href={href} />
+))}
+<link rel="alternate" hreflang="x-default" href={`${site}/`} />
+
+<meta property="og:type" content={type} />
+<meta property="og:site_name" content="Axionlab" />
+<meta property="og:title" content={title} />
+<meta property="og:description" content={description} />
+<meta property="og:url" content={canonical} />
+<meta property="og:image" content={ogImage} />
+<meta property="og:locale" content={ogLocale} />
+{alternates
+  .filter((a) => a.locale !== locale)
+  .map((a) => (
+    <meta
+      property="og:locale:alternate"
+      content={a.locale === 'uz' ? 'uz_UZ' : a.locale === 'ru' ? 'ru_RU' : 'en_US'}
+    />
+  ))}
+
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content={title} />
+<meta name="twitter:description" content={description} />
+<meta name="twitter:image" content={ogImage} />
+
+<meta name="robots" content="index, follow, max-image-preview:large" />
+<meta name="theme-color" content="#131b30" />
+
+{jsonLdArray.map((data) => (
+  <script type="application/ld+json" set:html={JSON.stringify(data)} />
+))}

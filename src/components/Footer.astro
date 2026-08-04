@@ -1,0 +1,65 @@
+---
+import type { Dictionary, Locale } from '../i18n/types';
+import { localizePath } from '../lib/paths';
+
+interface Props {
+  locale: Locale;
+  dict: Dictionary;
+}
+
+const { locale, dict } = Astro.props;
+const year = new Date().getFullYear();
+
+const links = [
+  { label: dict.nav.home, href: localizePath('', locale) },
+  { label: dict.nav.about, href: localizePath('about', locale) },
+  { label: dict.nav.solutions, href: localizePath('solutions', locale) },
+  { label: dict.nav.technologies, href: localizePath('technologies', locale) },
+  { label: dict.nav.contact, href: localizePath('contact', locale) },
+];
+---
+
+<footer class="border-t border-border bg-bg-elevated">
+  <div class="container-axion section-pad !py-16">
+    <div class="grid gap-12 md:grid-cols-2 lg:grid-cols-4">
+      <div class="lg:col-span-2">
+        <a href={localizePath('', locale)} class="inline-block mb-4" aria-label="Axionlab">
+          <img src="/icons/logo.svg" alt="Axionlab" width="140" height="30" class="h-7 w-auto" />
+        </a>
+        <p class="max-w-md text-fg-muted text-sm leading-relaxed">{dict.footer.tagline}</p>
+      </div>
+
+      <div>
+        <p class="label-mono mb-4">{dict.footer.links}</p>
+        <ul class="space-y-2">
+          {links.map((link) => (
+            <li>
+              <a href={link.href} class="text-sm text-fg-muted hover:text-accent transition-colors">
+                {link.label}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <div>
+        <p class="label-mono mb-4">{dict.footer.contact}</p>
+        <ul class="space-y-2 text-sm text-fg-muted">
+          <li>
+            <a href={`mailto:${dict.contactPage.email}`} class="hover:text-accent transition-colors">
+              {dict.contactPage.email}
+            </a>
+          </li>
+          <li>{dict.contactPage.officeAddress}</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="mt-12 flex flex-col gap-3 border-t border-border pt-6 sm:flex-row sm:items-center sm:justify-between">
+      <p class="text-xs text-fg-dim font-mono">
+        © {year} Axionlab. {dict.footer.rights}
+      </p>
+      <p class="text-xs text-fg-dim font-mono">axionlab.uz</p>
+    </div>
+  </div>
+</footer>

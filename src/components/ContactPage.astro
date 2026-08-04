@@ -1,0 +1,100 @@
+---
+import Layout from '../layouts/Layout.astro';
+import ContactForm from './ContactForm';
+import { getDictionary, type Locale } from '../i18n';
+import { localizePath } from '../lib/paths';
+
+interface Props {
+  locale?: Locale;
+}
+
+const locale = (Astro.props.locale ?? 'uz') as Locale;
+const dict = getDictionary(locale);
+const page = dict.contactPage;
+
+const breadcrumb = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    {
+      '@type': 'ListItem',
+      position: 1,
+      name: dict.nav.home,
+      item: `https://axionlab.uz${localizePath('', locale)}`,
+    },
+    {
+      '@type': 'ListItem',
+      position: 2,
+      name: dict.nav.contact,
+      item: `https://axionlab.uz${localizePath('contact', locale)}`,
+    },
+  ],
+};
+
+const contactLd = {
+  '@context': 'https://schema.org',
+  '@type': 'ContactPage',
+  name: page.metaTitle,
+  description: page.metaDescription,
+  url: `https://axionlab.uz${localizePath('contact', locale)}`,
+};
+---
+
+<Layout
+  locale={locale}
+  title={page.metaTitle}
+  description={page.metaDescription}
+  canonicalPath={localizePath('contact', locale)}
+  jsonLd={[breadcrumb, contactLd]}
+>
+  <section class="pt-28 md:pt-32 section-pad">
+    <div class="container-axion">
+      <div class="grid gap-12 lg:grid-cols-12 lg:gap-16">
+        <div class="lg:col-span-5 reveal">
+          <p class="label-mono mb-4">{page.label}</p>
+          <h1 class="text-[clamp(2rem,5vw,3.25rem)] font-semibold tracking-tight mb-4">
+            {page.title}
+          </h1>
+          <p class="text-fg-muted leading-relaxed mb-10">{page.subtitle}</p>
+
+          <div class="space-y-8">
+            <div>
+              <p class="label-mono mb-2">{page.officeTitle}</p>
+              <p class="text-fg-muted">{page.officeAddress}</p>
+            </div>
+            <div>
+              <p class="label-mono mb-2">{page.salesTitle}</p>
+              <a href={`mailto:${page.email}`} class="text-accent hover:underline">
+                {page.email}
+              </a>
+            </div>
+          </div>
+
+          <div class="mt-10 overflow-hidden rounded-2xl border border-border aspect-[16/10] bg-bg-card">
+            <iframe
+              title="Axionlab office map"
+              src="https://www.openstreetmap.org/export/embed.html?bbox=69.240%2C41.295%2C69.270%2C41.315&layer=mapnik&marker=41.305%2C69.255"
+              class="h-full w-full border-0 grayscale invert-[0.9] contrast-125 opacity-90"
+              loading="lazy"
+              referrerpolicy="no-referrer-when-downgrade"
+            ></iframe>
+          </div>
+        </div>
+
+        <div class="lg:col-span-7 reveal" style="transition-delay: 100ms">
+          <div class="rounded-2xl border border-border bg-bg-card p-6 md:p-8">
+            <ContactForm
+              client:load
+              fields={page.form.fields}
+              submitLabel={page.form.submit}
+              submittingLabel={page.form.submitting}
+              successMessage={page.form.success}
+              errorMessage={page.form.error}
+              locale={locale}
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</Layout>

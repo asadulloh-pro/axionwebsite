@@ -1,0 +1,108 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Technologies from './sections/Technologies.astro';
+import CTA from './sections/CTA.astro';
+import { getDictionary, type Locale } from '../i18n';
+import { localizePath } from '../lib/paths';
+
+interface Props {
+  locale?: Locale;
+}
+
+const locale = (Astro.props.locale ?? 'uz') as Locale;
+const dict = getDictionary(locale);
+const page = dict.technologiesPage;
+
+const breadcrumb = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    {
+      '@type': 'ListItem',
+      position: 1,
+      name: dict.nav.home,
+      item: `https://axionlab.uz${localizePath('', locale)}`,
+    },
+    {
+      '@type': 'ListItem',
+      position: 2,
+      name: dict.nav.technologies,
+      item: `https://axionlab.uz${localizePath('technologies', locale)}`,
+    },
+  ],
+};
+---
+
+<Layout
+  locale={locale}
+  title={page.metaTitle}
+  description={page.metaDescription}
+  canonicalPath={localizePath('technologies', locale)}
+  jsonLd={breadcrumb}
+>
+  <section class="ops page-intro">
+    <div class="ops-hero ops-hero--compact ops-hero--plain">
+      <div class="ops-veil" aria-hidden="true"></div>
+      <div class="container-axion ops-hero__inner">
+        <div class="ops-meta reveal">
+          <span class="ops-meta__live"></span>
+          <span>{page.label}</span>
+          <span class="ops-meta__sep" aria-hidden="true"></span>
+          <span>TECH</span>
+        </div>
+        <div class="ops-copy ops-copy--wide reveal" style="transition-delay: 80ms">
+          <div class="ops-reticle" aria-hidden="true">
+            <i></i><i></i><i></i><i></i>
+          </div>
+          <h1 class="ops-title">{page.title}</h1>
+          <p class="ops-body">{page.subtitle}</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <Technologies dict={dict} showHeader={false} />
+
+  <section class="ops">
+    <div class="ops-strip">
+      <div class="container-axion ops-strip__grid ops-strip__grid--2">
+        <article class="ops-item reveal">
+          <span class="ops-item__idx">01</span>
+          <div>
+            <h3>{page.integrationTitle}</h3>
+            <p>{page.integrationBody}</p>
+          </div>
+        </article>
+        <article class="ops-item reveal" style="transition-delay: 60ms">
+          <span class="ops-item__idx">02</span>
+          <div class="ops-integrity">
+            <img src="/icons/integrity-off.svg" alt="" width="120" height="80" loading="lazy" />
+            <img src="/icons/integrity-on.svg" alt="" width="120" height="80" loading="lazy" />
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <CTA dict={dict} locale={locale} />
+</Layout>
+
+<style>
+  .page-intro {
+    border-top: 0;
+    padding-top: 4.5rem;
+  }
+
+  .ops-integrity {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    opacity: 0.85;
+    min-height: 100%;
+  }
+
+  .ops-integrity img {
+    height: 4rem;
+    width: auto;
+  }
+</style>

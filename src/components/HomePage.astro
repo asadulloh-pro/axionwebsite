@@ -1,0 +1,27 @@
+---
+import Layout from '../layouts/Layout.astro';
+import IntroStage from './sections/IntroStage.astro';
+import Capabilities from './sections/Capabilities.astro';
+import Solutions from './sections/Solutions.astro';
+import Technologies from './sections/Technologies.astro';
+import Partners from './sections/Partners.astro';
+import CTA from './sections/CTA.astro';
+import { getDictionary, type Locale } from '../i18n';
+import { localizePath } from '../lib/paths';
+
+interface Props {
+  locale?: Locale;
+}
+
+const locale = (Astro.props.locale ?? 'uz') as Locale;
+const dict = getDictionary(locale);
+---
+
+<Layout locale={locale} canonicalPath={localizePath('', locale)}>
+  <IntroStage dict={dict} locale={locale} />
+  <Capabilities dict={dict} />
+  <Solutions dict={dict} locale={locale} />
+  <Technologies dict={dict} />
+  <Partners dict={dict} />
+  <CTA dict={dict} locale={locale} />
+</Layout>

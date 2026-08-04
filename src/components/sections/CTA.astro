@@ -1,0 +1,49 @@
+---
+import type { Dictionary, Locale } from '../../i18n/types';
+import { localizePath } from '../../lib/paths';
+
+interface Props {
+  dict: Dictionary;
+  locale: Locale;
+}
+
+const { dict, locale } = Astro.props;
+---
+
+<section class="ops" id="cta">
+  <div class="ops-hero ops-hero--compact">
+    <div class="ops-media" aria-hidden="true">
+      <img
+        src="/images/defence-security.jpg"
+        alt=""
+        width="1200"
+        height="675"
+        loading="lazy"
+        decoding="async"
+      />
+    </div>
+    <div class="ops-veil" aria-hidden="true"></div>
+
+    <div class="container-axion ops-hero__inner">
+      <div class="ops-meta reveal">
+        <span class="ops-meta__live"></span>
+        <span>CONTACT</span>
+        <span class="ops-meta__sep" aria-hidden="true"></span>
+        <span>ENGAGE</span>
+      </div>
+
+      <div class="ops-copy reveal" style="transition-delay: 80ms">
+        <div class="ops-reticle" aria-hidden="true">
+          <i></i><i></i><i></i><i></i>
+        </div>
+        <h2 class="ops-title">{dict.cta.title}</h2>
+        <p class="ops-body">{dict.cta.body}</p>
+        <div class="ops-actions">
+          <a href={localizePath('contact', locale)} class="ops-btn ops-btn--primary">
+            {dict.cta.button}
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

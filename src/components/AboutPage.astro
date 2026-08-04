@@ -1,0 +1,88 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Partners from './sections/Partners.astro';
+import CTA from './sections/CTA.astro';
+import { getDictionary, type Locale } from '../i18n';
+import { localizePath } from '../lib/paths';
+
+interface Props {
+  locale?: Locale;
+}
+
+const locale = (Astro.props.locale ?? Astro.params.locale ?? 'uz') as Locale;
+const dict = getDictionary(locale);
+const page = dict.aboutPage;
+
+const breadcrumb = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    {
+      '@type': 'ListItem',
+      position: 1,
+      name: dict.nav.home,
+      item: `https://axionlab.uz${localizePath('', locale)}`,
+    },
+    {
+      '@type': 'ListItem',
+      position: 2,
+      name: dict.nav.about,
+      item: `https://axionlab.uz${localizePath('about', locale)}`,
+    },
+  ],
+};
+---
+
+<Layout
+  locale={locale}
+  title={page.metaTitle}
+  description={page.metaDescription}
+  canonicalPath={localizePath('about', locale)}
+  jsonLd={breadcrumb}
+>
+  <section class="pt-28 md:pt-32 section-pad border-b border-border">
+    <div class="container-axion max-w-4xl">
+      <p class="label-mono mb-4 reveal">{page.label}</p>
+      <h1 class="reveal text-[clamp(2rem,5vw,3.5rem)] font-semibold tracking-tight mb-6">
+        {page.title}
+      </h1>
+      <p class="reveal text-lg text-fg-muted leading-relaxed">
+        {dict.company.body}
+      </p>
+    </div>
+  </section>
+
+  <section class="section-pad border-b border-border">
+    <div class="container-axion grid gap-10 lg:grid-cols-12">
+      <div class="lg:col-span-4 reveal">
+        <h2 class="text-2xl md:text-3xl font-semibold">{page.missionTitle}</h2>
+      </div>
+      <div class="lg:col-span-8 reveal">
+        <p class="text-base md:text-lg text-fg-muted leading-relaxed">{page.missionBody}</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section-pad border-b border-border">
+    <div class="container-axion">
+      <h2 class="reveal text-2xl md:text-3xl font-semibold mb-10">{page.approachTitle}</h2>
+      <div class="grid gap-4 sm:grid-cols-2">
+        {page.principles.map((principle, i) => (
+          <article
+            class="reveal rounded-2xl border border-border bg-bg-card p-6 md:p-8"
+            style={`transition-delay: ${i * 60}ms`}
+          >
+            <span class="font-mono text-xs text-accent mb-3 block">
+              [{String(i + 1).padStart(2, '0')}]
+            </span>
+            <h3 class="text-lg font-medium mb-2">{principle.title}</h3>
+            <p class="text-sm text-fg-muted leading-relaxed">{principle.body}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <Partners dict={dict} />
+  <CTA dict={dict} locale={locale} />
+</Layout>

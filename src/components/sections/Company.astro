@@ -1,0 +1,46 @@
+---
+import type { Dictionary } from '../../i18n/types';
+
+interface Props {
+  dict: Dictionary;
+}
+
+const { dict } = Astro.props;
+---
+
+<section class="ops" id="company">
+  <div class="ops-hero ops-hero--tall">
+    <div class="ops-media" aria-hidden="true">
+      <img
+        src="/images/counter-uas-dome.png"
+        alt=""
+        width="1024"
+        height="572"
+        loading="eager"
+        decoding="async"
+        fetchpriority="high"
+        class="ops-media--right"
+      />
+    </div>
+    <div class="ops-veil" aria-hidden="true"></div>
+
+    <div class="container-axion ops-hero__inner">
+      <div class="ops-meta reveal">
+        <span class="ops-meta__live"></span>
+        <span>COUNTER-UAS</span>
+      </div>
+
+      <div class="ops-core reveal" style="transition-delay: 80ms">
+        <p class="ops-index" aria-hidden="true">02</p>
+
+        <div class="ops-copy ops-copy--lead">
+          <div class="ops-reticle" aria-hidden="true">
+            <i></i><i></i><i></i><i></i>
+          </div>
+          <h2 class="ops-section-name">{dict.company.title}</h2>
+          <p class="ops-lead">{dict.company.body}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

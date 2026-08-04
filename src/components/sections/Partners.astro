@@ -1,0 +1,62 @@
+---
+import type { Dictionary } from '../../i18n/types';
+
+interface Props {
+  dict: Dictionary;
+}
+
+const { dict } = Astro.props;
+---
+
+<section class="ops" id="partners">
+  <div class="ops-hero ops-hero--compact ops-hero--plain">
+    <div class="ops-veil" aria-hidden="true"></div>
+    <div class="container-axion ops-hero__inner">
+      <div class="ops-meta reveal">
+        <span class="ops-meta__live"></span>
+        <span>{dict.partners.label}</span>
+        <span class="ops-meta__sep" aria-hidden="true"></span>
+        <span>ALLIANCE</span>
+      </div>
+
+      <div class="ops-copy ops-copy--wide reveal" style="transition-delay: 80ms">
+        <div class="ops-reticle" aria-hidden="true">
+          <i></i><i></i><i></i><i></i>
+        </div>
+        <h2 class="ops-title">{dict.partners.title}</h2>
+      </div>
+    </div>
+  </div>
+
+  <div class="ops-strip">
+    <div class="container-axion ops-strip__grid ops-strip__grid--2">
+      {dict.partners.items.map((partner, i) => (
+        <article class="ops-item reveal" style={`transition-delay: ${100 + i * 60}ms`}>
+          <span class="ops-item__idx">{String(i + 1).padStart(2, '0')}</span>
+          <div>
+            <img
+              src={partner.logo}
+              alt=""
+              width="140"
+              height="40"
+              class="ops-partner-logo"
+              loading="lazy"
+            />
+            <h3>{partner.name}</h3>
+            <p>{partner.description}</p>
+          </div>
+        </article>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .ops-partner-logo {
+    height: 2rem;
+    width: auto;
+    margin-bottom: 0.85rem;
+    object-fit: contain;
+    opacity: 0.9;
+  }
+</style>
