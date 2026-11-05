@@ -1,0 +1,411 @@
+---
+import type { Dictionary } from '../../i18n/types';
+import ChapterIntro from './ChapterIntro.astro';
+
+interface Props {
+  dict: Dictionary;
+}
+
+const { dict } = Astro.props;
+const t = dict.story.decide;
+const total = t.steps.length;
+---
+
+<section
+  class="chapter decide"
+  data-chapter
+  data-pin
+  data-length="1.8"
+  data-steps={total}
+  data-rail={dict.story.rail[4]}
+  aria-labelledby="decide-title"
+>
+  <div class="container-axion chapter__stage">
+    <div class="chapter__grid">
+      <div class="chapter__copy">
+        <ChapterIntro id="decide-title" index={4} label={t.label} title={t.title} />
+
+        <ol class="decide__steps">
+          {t.steps.map((step, i) => (
+            <li class="decide__step step-item step-fade" data-step-item={i}>
+              <span class="decide__step-idx">{String(i + 1).padStart(2, '0')}</span>
+              <div>
+                <h3 class="decide__step-title">{step.title}</h3>
+                <p class="decide__step-body">{step.body}</p>
+              </div>
+            </li>
+          ))}
+        </ol>
+
+        <p class="decide__closing">{t.closing}</p>
+      </div>
+
+      <div class="decide__view panel" aria-hidden="true">
+        <div class="decide__bar hud">
+          <span class="decide__status">
+            {t.steps.map((step, i) => (
+              <span class="decide__status-text step-item" data-step-item={i}>{step.status}</span>
+            ))}
+          </span>
+          <span class="decide__count">
+            {t.steps.map((_, i) => (
+              <span class="decide__status-text step-item" data-step-item={i}>
+                {String(i + 1).padStart(2, '0')} / {String(total).padStart(2, '0')}
+              </span>
+            ))}
+          </span>
+        </div>
+
+        <svg class="decide__scene" viewBox="0 0 640 400" preserveAspectRatio="xMidYMid slice">
+          <defs>
+            <linearGradient id="decide-sky" x1="0" x2="0" y1="0" y2="1">
+              <stop offset="0" stop-color="#0a1226" />
+              <stop offset="1" stop-color="#04070f" />
+            </linearGradient>
+          </defs>
+          <rect width="640" height="400" fill="url(#decide-sky)" />
+          <g class="decide__ground">
+            <line x1="0" y1="280" x2="640" y2="280" />
+            {Array.from({ length: 9 }, (_, i) => (
+              <line x1={320} y1={280} x2={-200 + i * 130} y2={400} />
+            ))}
+            <line x1="0" y1="310" x2="640" y2="310" />
+            <line x1="0" y1="350" x2="640" y2="350" />
+          </g>
+          <path d="M0 280 L60 262 L120 270 L190 248 L260 266 L330 252 L400 268 L470 246 L560 264 L640 254 L640 280 Z" class="decide__ridge" />
+
+          <g class="decide__effector step-item" data-step-item="3">
+            <path d="M90 330 L420 150" class="decide__beam" />
+            <rect x="70" y="322" width="40" height="16" class="decide__node" />
+            <text x="70" y="356" class="decide__label">JAMMER-02</text>
+          </g>
+
+          <g class="decide__target">
+            <g transform="translate(420 150)">
+              <g class="decide__drone">
+                <rect x="-6" y="-3" width="12" height="6" rx="1.5" />
+                <path d="M-6 -2 L-15 -7 M6 -2 L15 -7 M-6 2 L-15 7 M6 2 L15 7" />
+                <circle cx="-16" cy="-8" r="4" />
+                <circle cx="16" cy="-8" r="4" />
+                <circle cx="-16" cy="8" r="4" />
+                <circle cx="16" cy="8" r="4" />
+              </g>
+
+              <g class="decide__detect step-item" data-step-item="0">
+                <circle r="34" class="decide__pulse" />
+                <text x="40" y="-30" class="decide__label">TRK-0217</text>
+              </g>
+
+              <g class="decide__classify step-item" data-step-item="1">
+                <path d="M-30 -22 v-8 h8 M22 -30 h8 v8 M30 22 v8 h-8 M-22 30 h-8 v-8" class="decide__box" />
+                <text x="-30" y="48" class="decide__label decide__label--strong">UAV · 0.92</text>
+              </g>
+            </g>
+          </g>
+        </svg>
+
+        <div class="decide__operator step-item step-rise" data-step-item="2">
+          <span class="hud">{t.steps[2].status}</span>
+          <span class="decide__confirm">
+            <span class="decide__confirm-dot"></span>
+            {t.confirm}
+          </span>
+        </div>
+
+        <div class="decide__log hud step-item step-rise" data-step-item="3">
+          <span>LOG</span>
+          <span>TRK-0217 · {t.steps[3].status} · JAMMER-02</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .decide__steps {
+    display: grid;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    border-top: 1px solid var(--color-border);
+  }
+
+  .decide__step {
+    position: relative;
+    display: grid;
+    grid-template-columns: 2.5rem 1fr;
+    gap: 1rem;
+    padding: 1rem 0;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .decide__step::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: -1px;
+    height: 1px;
+    width: 100%;
+    background: var(--grad-brand);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.8s var(--ease-out-expo);
+  }
+
+  .decide__step.is-current::before {
+    transform: scaleX(1);
+  }
+
+  .decide__step-idx {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.04em;
+    color: var(--color-fg-dim);
+    padding-top: 0.35rem;
+  }
+
+  .decide__step-title {
+    font-size: 1.2rem;
+    letter-spacing: -0.02em;
+  }
+
+  .decide__step-body {
+    margin-top: 0.3rem;
+    font-size: 0.92rem;
+    line-height: 1.55;
+    color: var(--color-fg-muted);
+  }
+
+  .decide__closing {
+    font-size: 1.05rem;
+    color: var(--color-fg);
+  }
+
+  .decide__view {
+    position: relative;
+    overflow: hidden;
+    background: rgba(var(--rgb-bg), 0.8);
+  }
+
+  .decide__bar {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .decide__status,
+  .decide__count {
+    display: grid;
+  }
+
+  .decide__status-text {
+    grid-area: 1 / 1;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .decide__status-text.is-current {
+    opacity: 1;
+  }
+
+  .decide__status .decide__status-text {
+    color: var(--color-fg);
+  }
+
+  .decide__scene {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 10;
+  }
+
+  .decide__ground line {
+    stroke: rgba(var(--rgb-fg), 0.06);
+  }
+
+  .decide__ridge {
+    fill: #070c19;
+    stroke: rgba(var(--rgb-fg), 0.14);
+  }
+
+  .decide__target {
+    animation: decide-drift 7s ease-in-out infinite alternate;
+  }
+
+  .decide__drone {
+    fill: none;
+    stroke: var(--color-fg);
+    stroke-width: 1.2;
+  }
+
+  .decide__pulse {
+    fill: none;
+    stroke: var(--color-accent);
+    transform-origin: 0 0;
+    animation: decide-pulse 1.8s ease-out infinite;
+  }
+
+  .decide__box {
+    fill: none;
+    stroke: var(--color-accent-soft);
+    stroke-width: 1.5;
+  }
+
+  .decide__label {
+    fill: var(--color-fg-muted);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.04em;
+  }
+
+  .decide__label--strong {
+    fill: var(--color-fg);
+  }
+
+  .decide__beam {
+    fill: none;
+    stroke: var(--color-accent);
+    stroke-width: 1.5;
+    stroke-dasharray: 6 6;
+    animation: decide-beam 0.8s linear infinite;
+  }
+
+  .decide__node {
+    fill: rgba(var(--rgb-accent), 0.1);
+    stroke: var(--color-accent);
+  }
+
+  .decide__detect,
+  .decide__classify,
+  .decide__effector {
+    opacity: 0;
+    transition: opacity 0.5s ease;
+  }
+
+  .decide__detect.is-on,
+  .decide__classify.is-on,
+  .decide__effector.is-on {
+    opacity: 1;
+  }
+
+  html.story-static .decide__detect,
+  html.story-static .decide__classify,
+  html.story-static .decide__effector {
+    opacity: 1;
+  }
+
+  .decide__operator {
+    position: absolute;
+    right: 1rem;
+    bottom: 3.6rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.6rem 0.6rem 0.6rem 1rem;
+    border: 1px solid var(--color-border-strong);
+    background: rgba(var(--rgb-bg), 0.92);
+  }
+
+  .decide__confirm {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.45rem 0.9rem;
+    border-radius: 2px;
+    border: 1px solid var(--color-accent);
+    font-family: var(--font-mono);
+    font-size: 0.66rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--color-fg);
+  }
+
+  .decide__operator.is-current .decide__confirm {
+    animation: decide-ready 1.2s ease-in-out infinite alternate;
+  }
+
+  .decide__confirm-dot {
+    width: 0.4rem;
+    height: 0.4rem;
+    border-radius: 999px;
+    background: var(--color-fg-dim);
+  }
+
+  .decide[data-step='3'] .decide__confirm {
+    border-color: transparent;
+    background: var(--grad-brand);
+    color: #fff;
+  }
+
+  .decide[data-step='3'] .decide__confirm-dot {
+    background: #fff;
+  }
+
+  .decide__log {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    gap: 1rem;
+    padding: 0.75rem 1rem;
+    border-top: 1px solid var(--color-border);
+    background: rgba(var(--rgb-bg), 0.95);
+    color: var(--color-fg-muted);
+  }
+
+  .decide__log span:first-child {
+    color: var(--color-accent-soft);
+  }
+
+  @media (max-width: 639px) {
+    .decide__scene {
+      aspect-ratio: 4 / 3;
+    }
+
+    .decide__operator,
+    .decide__log {
+      position: static;
+    }
+
+    .decide__operator {
+      justify-content: space-between;
+      border-width: 1px 0 0;
+    }
+  }
+
+  @keyframes decide-drift {
+    from {
+      transform: translate(-10px, 4px);
+    }
+    to {
+      transform: translate(14px, -8px);
+    }
+  }
+
+  @keyframes decide-pulse {
+    from {
+      transform: scale(0.4);
+      opacity: 1;
+    }
+    to {
+      transform: scale(1.3);
+      opacity: 0;
+    }
+  }
+
+  @keyframes decide-beam {
+    to {
+      stroke-dashoffset: -12;
+    }
+  }
+
+  @keyframes decide-ready {
+    from {
+      box-shadow: 0 0 0 0 rgba(var(--rgb-accent), 0);
+    }
+    to {
+      box-shadow: 0 0 0 6px rgba(var(--rgb-accent), 0.2);
+    }
+  }
+</style>

@@ -1,0 +1,99 @@
+---
+import type { Dictionary } from '../../i18n/types';
+import ChapterIntro from './ChapterIntro.astro';
+
+interface Props {
+  dict: Dictionary;
+}
+
+const { dict } = Astro.props;
+const t = dict.story.field;
+---
+
+<section class="chapter field" data-chapter data-rail={dict.story.rail[5]} aria-labelledby="field-title">
+  <div class="container-axion section-pad">
+    <div class="field__head reveal">
+      <ChapterIntro id="field-title" index={5} label={t.label} title={t.title} />
+    </div>
+
+    <div class="field__grid">
+      {t.cards.map((card, i) => (
+        <article class="field__card reveal" style={`transition-delay: ${i * 90}ms`}>
+          <span class="field__idx hud">{String(i + 1).padStart(2, '0')}</span>
+          <h3 class="field__word">{card.title}</h3>
+          <p class="field__body">{card.body}</p>
+        </article>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .field__head {
+    max-width: 48rem;
+  }
+
+  .field__grid {
+    display: grid;
+    margin-top: clamp(3rem, 7vw, 5rem);
+    border-top: 1px solid var(--color-border);
+  }
+
+  @media (min-width: 640px) {
+    .field__grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (min-width: 1100px) {
+    .field__grid {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+  }
+
+  .field__card {
+    position: relative;
+    container-type: inline-size;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding: 2rem 1.5rem 2.25rem 0;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  @media (min-width: 640px) {
+    .field__card {
+      padding-left: 1.5rem;
+      border-left: 1px solid var(--color-border);
+    }
+  }
+
+  .field__card::before {
+    content: '';
+    position: absolute;
+    top: -1px;
+    left: 0;
+    width: 100%;
+    height: 1px;
+    background: var(--grad-brand);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 1.2s var(--ease-out-expo) 0.2s;
+  }
+
+  .field__card:global(.is-visible)::before {
+    transform: scaleX(1);
+  }
+
+  .field__word {
+    font-size: clamp(1.6rem, 10.5cqi, 3.4rem);
+    font-weight: 320;
+    letter-spacing: -0.045em;
+    line-height: 1;
+  }
+
+  .field__body {
+    color: var(--color-fg-muted);
+    line-height: 1.6;
+  }
+</style>

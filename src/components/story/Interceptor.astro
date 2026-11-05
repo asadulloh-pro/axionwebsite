@@ -1,0 +1,305 @@
+---
+import type { Dictionary, Locale } from '../../i18n/types';
+import { localizePath } from '../../lib/paths';
+import ChapterIntro from './ChapterIntro.astro';
+
+interface Props {
+  dict: Dictionary;
+  locale: Locale;
+}
+
+const { dict, locale } = Astro.props;
+const t = dict.story.interceptor;
+---
+
+<section
+  id="interceptor"
+  class="chapter interceptor"
+  data-chapter
+  data-pin
+  data-intercept
+  data-length="2.8"
+  data-rail={dict.story.rail[2]}
+  aria-labelledby="interceptor-title"
+>
+  <div class="container-axion chapter__stage">
+    <div class="chapter__grid">
+      <div class="chapter__copy">
+        <ChapterIntro id="interceptor-title" index={2} label={t.label} title={t.title} body={t.body} />
+        <dl class="interceptor__specs">
+          {t.specs.map((spec) => (
+            <div class="interceptor__spec">
+              <dt>{spec.label}</dt>
+              <dd>{spec.value}</dd>
+            </div>
+          ))}
+        </dl>
+        <a href={localizePath('projects/interceptor', locale)} class="btn btn--primary interceptor__cta">
+          {t.cta}
+          <span class="btn__arrow" aria-hidden="true">→</span>
+        </a>
+      </div>
+      <div class="interceptor__scene" aria-hidden="true"></div>
+    </div>
+  </div>
+  <div class="lock-layer" aria-hidden="true">
+    <svg class="lock-layer__svg">
+      <line class="ov-lockline" data-lock-line x1="0" y1="0" x2="0" y2="0"></line>
+    </svg>
+    <div class="lock" data-lock data-state="tracking">
+      <span class="lock__box"><i></i><i></i><i></i><i></i></span>
+      <span class="lock__tag">
+        <b>{t.lock.target}</b>
+        <span class="lock__state">
+          <span class="lock__s lock__s--tracking">{t.lock.tracking}</span>
+          <span class="lock__s lock__s--locked">● {t.lock.locked}</span>
+          <span class="lock__s lock__s--destroyed">✓ {t.lock.destroyed}</span>
+        </span>
+      </span>
+    </div>
+  </div>
+</section>
+
+<style>
+  .interceptor__scene {
+    min-height: 40svh;
+  }
+
+  @media (min-width: 900px) {
+    .interceptor__scene {
+      min-height: 1px;
+    }
+  }
+
+  .interceptor__specs {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    margin: 0;
+    border-top: 1px solid var(--color-border);
+  }
+
+  .interceptor__spec {
+    display: grid;
+    gap: 0.2rem;
+    padding: 0.9rem 0;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .interceptor__spec:nth-child(odd) {
+    padding-right: 1rem;
+    border-right: 1px solid var(--color-border);
+  }
+
+  .interceptor__spec:nth-child(even) {
+    padding-left: 1rem;
+  }
+
+  .interceptor__spec dt {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-accent-soft);
+  }
+
+  .interceptor__spec dd {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 350;
+    letter-spacing: -0.02em;
+    color: var(--color-fg);
+  }
+
+  .interceptor__cta {
+    align-self: flex-start;
+  }
+
+
+  /* Target lock: positioned every frame by the WebGL stage over the drone. */
+  .interceptor {
+    position: relative;
+  }
+
+  .lock-layer {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  .lock-layer__svg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .lock-layer__svg line {
+    opacity: 0;
+  }
+
+  /* Line of sight from the interceptor to the locked target. */
+  .ov-lockline {
+    stroke: rgba(255, 79, 122, 0.6);
+    stroke-width: 1;
+    stroke-dasharray: 4 6;
+    animation: lock-dash 1s linear infinite;
+  }
+
+  .lock {
+    --size: 60px;
+    --red: 255, 79, 122;
+    position: absolute;
+    left: 0;
+    top: 0;
+    opacity: 0;
+    will-change: transform, opacity;
+  }
+
+  .lock__box {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: var(--size);
+    height: calc(var(--size) * 0.7);
+    border: 1px dashed rgba(var(--red), 0.75);
+    transform: translate(-50%, -50%) scale(1.15);
+    transition:
+      transform 0.45s cubic-bezier(0.2, 0.8, 0.2, 1),
+      border-color 0.3s ease;
+  }
+
+  .lock__box i {
+    position: absolute;
+    width: 28%;
+    height: 34%;
+    border: 0 solid rgb(var(--red));
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .lock__box i:nth-child(1) {
+    left: -2px;
+    top: -2px;
+    border-width: 2px 0 0 2px;
+  }
+
+  .lock__box i:nth-child(2) {
+    right: -2px;
+    top: -2px;
+    border-width: 2px 2px 0 0;
+  }
+
+  .lock__box i:nth-child(3) {
+    left: -2px;
+    bottom: -2px;
+    border-width: 0 0 2px 2px;
+  }
+
+  .lock__box i:nth-child(4) {
+    right: -2px;
+    bottom: -2px;
+    border-width: 0 2px 2px 0;
+  }
+
+  .lock[data-state='locked'] .lock__box,
+  .lock[data-state='destroyed'] .lock__box {
+    border-color: transparent;
+    transform: translate(-50%, -50%) scale(1);
+  }
+
+  .lock[data-state='locked'] .lock__box i {
+    opacity: 1;
+    animation: lock-pulse 1.1s ease-in-out infinite;
+  }
+
+  .lock[data-state='destroyed'] .lock__box i {
+    opacity: 1;
+    border-color: rgb(88, 210, 130);
+  }
+
+  .lock__tag {
+    position: absolute;
+    left: calc(var(--size) * 0.5 + 0.6rem);
+    top: calc(var(--size) * -0.35);
+    display: grid;
+    gap: 0.15rem;
+    padding: 0.35rem 0.55rem;
+    border-left: 2px solid rgb(var(--red));
+    background: rgba(8, 10, 16, 0.78);
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    color: rgba(255, 255, 255, 0.92);
+  }
+
+  .lock[data-side='left'] .lock__tag {
+    left: auto;
+    right: calc(var(--size) * 0.5 + 0.6rem);
+    border-left: 0;
+    border-right: 2px solid rgb(var(--red));
+    text-align: right;
+  }
+
+  .lock[data-side='left'][data-state='destroyed'] .lock__tag {
+    border-right-color: rgb(88, 210, 130);
+  }
+
+  .lock__tag b {
+    font-weight: 500;
+  }
+
+  .lock__state {
+    display: grid;
+  }
+
+  .lock__s {
+    grid-area: 1 / 1;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .lock__s--tracking {
+    color: rgba(255, 255, 255, 0.65);
+  }
+
+  .lock__s--locked {
+    color: rgb(var(--red));
+  }
+
+  .lock__s--destroyed {
+    color: rgb(88, 210, 130);
+  }
+
+  .lock[data-state='tracking'] .lock__s--tracking,
+  .lock[data-state='locked'] .lock__s--locked,
+  .lock[data-state='destroyed'] .lock__s--destroyed {
+    opacity: 1;
+  }
+
+  .lock[data-state='destroyed'] .lock__tag {
+    border-left-color: rgb(88, 210, 130);
+  }
+
+  @keyframes lock-pulse {
+    50% {
+      opacity: 0.45;
+    }
+  }
+
+  @keyframes lock-dash {
+    to {
+      stroke-dashoffset: -20;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ov-lockline,
+    .lock[data-state='locked'] .lock__box i {
+      animation: none;
+    }
+  }
+</style>

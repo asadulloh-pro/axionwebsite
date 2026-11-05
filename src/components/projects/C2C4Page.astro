@@ -1,0 +1,398 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ClosingCTA from '../ClosingCTA.astro';
+import ChapterIntro from '../story/ChapterIntro.astro';
+import StoryRail from '../story/StoryRail.astro';
+import C2Screen from './C2Screen.astro';
+import C4Wall from './C4Wall.astro';
+import { getDictionary, type Locale } from '../../i18n';
+import { localizePath } from '../../lib/paths';
+
+interface Props {
+  locale?: Locale;
+}
+
+const locale = (Astro.props.locale ?? 'uz') as Locale;
+const dict = getDictionary(locale);
+const page = dict.projectsPage.c2c4;
+
+const breadcrumb = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    {
+      '@type': 'ListItem',
+      position: 1,
+      name: dict.nav.home,
+      item: `https://axionlab.uz${localizePath('', locale)}`,
+    },
+    {
+      '@type': 'ListItem',
+      position: 2,
+      name: page.breadcrumb,
+      item: `https://axionlab.uz${localizePath('projects/c2-c4', locale)}`,
+    },
+  ],
+};
+---
+
+<Layout
+  locale={locale}
+  title={page.metaTitle}
+  description={page.metaDescription}
+  canonicalPath={localizePath('projects/c2-c4', locale)}
+  jsonLd={breadcrumb}
+>
+  <div class="webgl-stage" data-webgl aria-hidden="true">
+    <picture class="webgl-stage__still">
+      <source srcset="/media/story/terrain-still.avif" type="image/avif" />
+      <source srcset="/media/story/terrain-still.webp" type="image/webp" />
+      <img src="/media/story/terrain-still.jpg" alt="" width="1920" height="1080" fetchpriority="low" />
+    </picture>
+    <div class="webgl-stage__veil"></div>
+  </div>
+
+  <div class="story" data-story>
+    <section id="intro" class="chapter pj-intro" data-chapter data-rail={page.rail[0]} aria-labelledby="pj-title">
+      <div class="container-axion chapter__stage">
+        <div class="pj-intro__copy">
+          <a class="pj-back hud" href={`${localizePath('', locale)}#problem`}>← {dict.nav.home}</a>
+          <ChapterIntro id="pj-title" index={0} label={page.intro.label} title={page.intro.title} body={page.intro.body} as="h1" size="lg" />
+        </div>
+        <span class="pj-intro__cue hud" aria-hidden="true">{page.intro.scrollCue} ↓</span>
+      </div>
+    </section>
+
+    <section
+      id="site"
+      class="chapter pj-site"
+      data-chapter
+      data-pin
+      data-length="1.6"
+      data-rail={page.rail[1]}
+      aria-labelledby="pj-site-title"
+    >
+      <div class="container-axion chapter__stage">
+        <div class="chapter__grid">
+          <div class="chapter__copy">
+            <ChapterIntro id="pj-site-title" index={1} label={page.site.label} title={page.site.title} body={page.site.body} />
+          </div>
+          <div class="pj-scene" aria-hidden="true"></div>
+        </div>
+      </div>
+    </section>
+
+    <section
+      id="c2"
+      class="chapter pj-c2"
+      data-chapter
+      data-pin
+      data-length="2.2"
+      data-rail={page.rail[2]}
+      aria-labelledby="pj-c2-title"
+    >
+      <div class="container-axion chapter__stage">
+        <div class="pj-split">
+          <div class="pj-split__side">
+            <ChapterIntro id="pj-c2-title" index={2} label={page.c2.label} title={page.c2.title} body={page.c2.body} />
+          </div>
+          <div class="pj-device pj-device--laptop">
+            <C2Screen ui={page.c2ui} caption={page.caption} />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section
+      id="network"
+      class="chapter pj-network"
+      data-chapter
+      data-pin
+      data-length="1.8"
+      data-rail={page.rail[3]}
+      aria-labelledby="pj-network-title"
+    >
+      <div class="container-axion chapter__stage">
+        <div class="chapter__grid">
+          <div class="chapter__copy">
+            <ChapterIntro
+              id="pj-network-title"
+              index={3}
+              label={page.network.label}
+              title={page.network.title}
+              body={page.network.body}
+            />
+          </div>
+          <div class="pj-scene" aria-hidden="true"></div>
+        </div>
+      </div>
+    </section>
+
+    <section
+      id="c4"
+      class="chapter pj-c4"
+      data-chapter
+      data-pin
+      data-length="3.2"
+      data-rail={page.rail[4]}
+      aria-labelledby="pj-c4-title"
+    >
+      <div class="container-axion chapter__stage pj-c4__stage">
+        <div class="pj-c4__copy">
+          <ChapterIntro id="pj-c4-title" index={4} label={page.c4.label} title={page.c4.title} body={page.c4.body} />
+        </div>
+        <div class="pj-device pj-device--room">
+          <C4Wall ui={page.c4ui} devices={page.c2ui.devices} caption={page.caption} />
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <ClosingCTA dict={dict} locale={locale} />
+  <StoryRail first={page.rail[0]} total={page.rail.length} />
+</Layout>
+
+<script>
+  import { initStory } from '../../scripts/story';
+  import { initWebGL } from '../../scripts/webgl';
+  initStory();
+  initWebGL(document.querySelector<HTMLElement>('[data-webgl]'), () =>
+    import('../../scripts/webgl/project-stage').then((m) => m.createProjectStage),
+  );
+</script>
+
+<style>
+  .story {
+    position: relative;
+    z-index: 1;
+  }
+
+  .story :global(.chapter:first-child) {
+    border-top: 0;
+  }
+
+  .webgl-stage {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  .webgl-stage :global(canvas) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    transition: opacity 0.8s ease;
+  }
+
+  .webgl-stage.is-live :global(canvas) {
+    opacity: 1;
+  }
+
+  .webgl-stage__still img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0.5;
+    transition: opacity 1.6s ease;
+  }
+
+  .webgl-stage.is-live .webgl-stage__still img {
+    opacity: 0;
+  }
+
+  .webgl-stage__veil {
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(90deg, rgba(var(--rgb-bg), 0.4) 0%, rgba(var(--rgb-bg), 0.08) 45%, transparent 70%),
+      linear-gradient(180deg, rgba(var(--rgb-bg), 0.5) 0%, transparent 25%, transparent 75%, rgba(var(--rgb-bg), 0.7) 100%);
+  }
+
+  /* Intro */
+  .pj-intro__copy {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    max-width: 52rem;
+  }
+
+  .pj-back {
+    align-self: flex-start;
+    color: var(--color-fg-muted);
+    transition: color 0.3s ease;
+  }
+
+  .pj-back:hover {
+    color: var(--color-fg);
+  }
+
+  .pj-intro__cue {
+    position: absolute;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    color: var(--color-fg-muted);
+    animation: pj-cue 2.4s ease-in-out infinite;
+  }
+
+  @keyframes pj-cue {
+    50% {
+      transform: translate(-50%, 6px);
+      opacity: 0.5;
+    }
+  }
+
+  .pj-scene {
+    min-height: 40svh;
+  }
+
+  /* C2: the field laptop on the left, the site streaming into it on the right. */
+  .pj-split {
+    display: grid;
+    gap: 2rem;
+    width: 100%;
+  }
+
+
+  .pj-device--laptop {
+    width: min(100%, 40rem);
+  }
+
+  .pj-c4__stage {
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: center;
+    gap: 2rem;
+  }
+
+  .pj-device--room {
+    width: 100%;
+  }
+
+  /* Narrow screens crop the room around the wall so the C4 picture stays legible. */
+  @media (max-width: 899px) {
+    .pj-device--room {
+      overflow: hidden;
+    }
+
+    .pj-device--room :global(.c4w__room) {
+      width: 136%;
+      margin-left: -18%;
+      margin-top: -12%;
+    }
+  }
+
+  @media (min-width: 900px) {
+    .pj-scene {
+      min-height: 1px;
+    }
+
+    .pj-split {
+      grid-template-columns: minmax(0, 1.5fr) minmax(0, 0.5fr);
+      align-items: center;
+    }
+
+    /* Copy top right, above the site, so the laptop can take the whole left side. */
+    .pj-split__side {
+      grid-area: 1 / 2;
+      align-self: start;
+    }
+
+    .pj-split__side,
+    .pj-site .chapter__copy,
+    .pj-network .chapter__copy,
+    .pj-c4__copy {
+      position: relative;
+    }
+
+    /* Domes and data lanes pass behind the copy, so it gets a soft dark backing. */
+    .pj-split__side::before,
+    .pj-site .chapter__copy::before,
+    .pj-network .chapter__copy::before,
+    .pj-c4__copy::before {
+      content: '';
+      position: absolute;
+      inset: -2.5rem -3rem;
+      z-index: -1;
+      background: radial-gradient(closest-side, rgba(var(--rgb-bg), 0.88), rgba(var(--rgb-bg), 0.6) 60%, transparent);
+    }
+
+    .pj-split__side :global(.lede),
+    .pj-site :global(.lede),
+    .pj-network :global(.lede),
+    .pj-c4 :global(.lede) {
+      color: var(--color-fg);
+      opacity: 0.86;
+    }
+
+    .pj-c2 .pj-device--laptop {
+      grid-area: 1 / 1;
+    }
+
+    .pj-c2 :global(.chapter-intro) {
+      gap: 1rem;
+    }
+
+    .pj-c2 :global(.headline) {
+      font-size: clamp(1.5rem, 2.1vw, 2.2rem);
+    }
+
+    .pj-c2 :global(.lede) {
+      font-size: 0.95rem;
+    }
+
+    .pj-c2.is-pinned .pj-device--laptop {
+      --in: clamp(0, var(--p) * 7, 1);
+      width: min(100%, 58rem, calc((100vh - 16rem) * 1.18));
+      opacity: var(--in);
+      transform: translateX(calc((1 - var(--in)) * -3rem)) scale(calc(0.94 + var(--in) * 0.06));
+      transform-origin: left center;
+    }
+
+    .pj-c4__stage {
+      display: grid;
+      grid-template-columns: minmax(0, 0.55fr) minmax(0, 1.45fr);
+      align-items: center;
+    }
+
+    .pj-c4 :global(.headline) {
+      font-size: clamp(1.8rem, 2.6vw, 2.6rem);
+    }
+
+    /* Pinned, the room sits high so the domes on the relief below can stream up into the wall. */
+    .pj-c4.is-pinned .pj-c4__stage {
+      grid-template-rows: auto 1fr;
+      align-items: start;
+      padding-top: 5.5rem;
+    }
+
+    /* Once every site is online the camera pushes into the wall (read by C4Wall as --c4-zoom). */
+    .pj-c4.is-pinned {
+      --c4-zoom-t: clamp(0, (var(--p) - 0.55) / 0.1, 1);
+      --c4-zoom: calc(var(--c4-zoom-t) * var(--c4-zoom-t) * (3 - 2 * var(--c4-zoom-t)));
+      overflow: clip;
+    }
+
+    .pj-c4.is-pinned .pj-c4__copy {
+      grid-area: 2 / 1;
+      align-self: end;
+      max-width: 24rem;
+      opacity: calc(1 - var(--c4-zoom));
+      transform: translateY(calc(var(--c4-zoom) * 1.5rem));
+    }
+
+    .pj-c4.is-pinned .pj-device--room {
+      --in: clamp(0, var(--p) * 6, 1);
+      grid-area: 1 / 1 / 2 / 3;
+      width: min(100%, calc(50vh * 1.78));
+      justify-self: end;
+      opacity: var(--in);
+      transform: translateY(calc((1 - var(--in)) * -2rem)) scale(calc(0.95 + var(--in) * 0.05));
+    }
+  }
+</style>

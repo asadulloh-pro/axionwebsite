@@ -1,0 +1,356 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ClosingCTA from '../ClosingCTA.astro';
+import ChapterIntro from '../story/ChapterIntro.astro';
+import StoryRail from '../story/StoryRail.astro';
+import SeekerView from './SeekerView.astro';
+import { getDictionary, type Locale } from '../../i18n';
+import { localizePath } from '../../lib/paths';
+
+interface Props {
+  locale?: Locale;
+}
+
+const locale = (Astro.props.locale ?? 'uz') as Locale;
+const dict = getDictionary(locale);
+const page = dict.projectsPage.interceptor;
+
+const breadcrumb = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    {
+      '@type': 'ListItem',
+      position: 1,
+      name: dict.nav.home,
+      item: `https://axionlab.uz${localizePath('', locale)}`,
+    },
+    {
+      '@type': 'ListItem',
+      position: 2,
+      name: page.breadcrumb,
+      item: `https://axionlab.uz${localizePath('projects/interceptor', locale)}`,
+    },
+  ],
+};
+
+const beats = [
+  { id: 'threat', beat: page.threat, length: '1.8' },
+  { id: 'launch', beat: page.launch, length: '1.8' },
+] as const;
+---
+
+<Layout
+  locale={locale}
+  title={page.metaTitle}
+  description={page.metaDescription}
+  canonicalPath={localizePath('projects/interceptor', locale)}
+  jsonLd={breadcrumb}
+>
+  <div class="webgl-stage" data-webgl aria-hidden="true">
+    <picture class="webgl-stage__still">
+      <source srcset="/media/story/terrain-still.avif" type="image/avif" />
+      <source srcset="/media/story/terrain-still.webp" type="image/webp" />
+      <img src="/media/story/terrain-still.jpg" alt="" width="1920" height="1080" fetchpriority="low" />
+    </picture>
+    <div class="webgl-stage__veil"></div>
+  </div>
+
+  <div class="story" data-story>
+    <section id="intro" class="chapter ic-intro" data-chapter data-rail={page.rail[0]} aria-labelledby="ic-title">
+      <div class="container-axion chapter__stage">
+        <div class="ic-intro__copy">
+          <a class="ic-back hud" href={`${localizePath('', locale)}#interceptor`}>← {dict.nav.home}</a>
+          <ChapterIntro id="ic-title" index={0} label={page.intro.label} title={page.intro.title} body={page.intro.body} as="h1" size="lg" />
+        </div>
+        <span class="ic-intro__cue hud" aria-hidden="true">{page.intro.scrollCue} ↓</span>
+      </div>
+    </section>
+
+    {
+      beats.map(({ id, beat, length }, i) => (
+        <section
+          id={id}
+          class="chapter ic-beat"
+          data-chapter
+          data-pin
+          data-length={length}
+          data-rail={page.rail[i + 1]}
+          aria-labelledby={`ic-${id}-title`}
+        >
+          <div class="container-axion chapter__stage">
+            <div class="chapter__grid">
+              <div class="chapter__copy ic-copy">
+                <ChapterIntro id={`ic-${id}-title`} index={i + 1} label={beat.label} title={beat.title} body={beat.body} />
+              </div>
+              <div class="ic-scene" aria-hidden="true"></div>
+            </div>
+          </div>
+        </section>
+      ))
+    }
+
+    <section
+      id="seeker"
+      class="chapter ic-seeker"
+      data-chapter
+      data-pin
+      data-length="2.6"
+      data-rail={page.rail[3]}
+      aria-labelledby="ic-seeker-title"
+    >
+      <div class="container-axion chapter__stage">
+        <div class="ic-split">
+          <div class="ic-split__side ic-copy">
+            <ChapterIntro id="ic-seeker-title" index={3} label={page.seeker.label} title={page.seeker.title} body={page.seeker.body} />
+          </div>
+          <div class="ic-device">
+            <SeekerView ui={page.seekerUi} caption={page.caption} />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section
+      id="impact"
+      class="chapter ic-beat"
+      data-chapter
+      data-pin
+      data-length="1.8"
+      data-rail={page.rail[4]}
+      aria-labelledby="ic-impact-title"
+    >
+      <div class="container-axion chapter__stage">
+        <div class="chapter__grid">
+          <div class="chapter__copy ic-copy">
+            <ChapterIntro id="ic-impact-title" index={4} label={page.impact.label} title={page.impact.title} body={page.impact.body} />
+          </div>
+          <div class="ic-scene" aria-hidden="true"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="specs" class="chapter ic-specs" data-chapter data-rail={page.rail[5]} aria-labelledby="ic-specs-title">
+      <div class="container-axion chapter__stage ic-specs__stage">
+        <div class="ic-copy">
+          <ChapterIntro id="ic-specs-title" index={5} label={page.specs.label} title={page.specs.title} body={page.specs.body} />
+        </div>
+        <dl class="ic-specs__grid">
+          {
+            page.specs.items.map((item) => (
+              <div class="ic-spec">
+                <dt class="hud">{item.label}</dt>
+                <dd>{item.value}</dd>
+              </div>
+            ))
+          }
+        </dl>
+      </div>
+    </section>
+  </div>
+
+  <ClosingCTA dict={dict} locale={locale} />
+  <StoryRail first={page.rail[0]} total={page.rail.length} />
+</Layout>
+
+<script>
+  import { initStory } from '../../scripts/story';
+  import { initWebGL } from '../../scripts/webgl';
+  initStory();
+  initWebGL(document.querySelector<HTMLElement>('[data-webgl]'), () =>
+    import('../../scripts/webgl/interceptor-stage').then((m) => m.createInterceptorStage),
+  );
+</script>
+
+<style>
+  .story {
+    position: relative;
+    z-index: 1;
+  }
+
+  .story :global(.chapter:first-child) {
+    border-top: 0;
+  }
+
+  .webgl-stage {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  .webgl-stage :global(canvas) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    transition: opacity 0.8s ease;
+  }
+
+  .webgl-stage.is-live :global(canvas) {
+    opacity: 1;
+  }
+
+  .webgl-stage__still img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0.5;
+    transition: opacity 1.6s ease;
+  }
+
+  .webgl-stage.is-live .webgl-stage__still img {
+    opacity: 0;
+  }
+
+  .webgl-stage__veil {
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(90deg, rgba(var(--rgb-bg), 0.4) 0%, rgba(var(--rgb-bg), 0.08) 45%, transparent 70%),
+      linear-gradient(180deg, rgba(var(--rgb-bg), 0.5) 0%, transparent 25%, transparent 75%, rgba(var(--rgb-bg), 0.7) 100%);
+  }
+
+  .ic-intro__copy {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    max-width: 52rem;
+  }
+
+  .ic-back {
+    align-self: flex-start;
+    color: var(--color-fg-muted);
+    transition: color 0.3s ease;
+  }
+
+  .ic-back:hover {
+    color: var(--color-fg);
+  }
+
+  .ic-intro__cue {
+    position: absolute;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    color: var(--color-fg-muted);
+    animation: ic-cue 2.4s ease-in-out infinite;
+  }
+
+  @keyframes ic-cue {
+    50% {
+      transform: translate(-50%, 6px);
+      opacity: 0.5;
+    }
+  }
+
+  .ic-scene {
+    min-height: 40svh;
+  }
+
+  .ic-split {
+    display: grid;
+    gap: 2rem;
+    width: 100%;
+  }
+
+  .ic-device {
+    width: min(100%, 44rem);
+  }
+
+  .ic-specs__stage {
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: center;
+    gap: 3rem;
+  }
+
+  .ic-specs__grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1px;
+    margin: 0;
+    border: 1px solid rgba(var(--rgb-fg), 0.12);
+    background: rgba(var(--rgb-fg), 0.12);
+  }
+
+  .ic-spec {
+    display: grid;
+    gap: 0.6rem;
+    padding: 1.4rem 1.2rem;
+    background: rgba(var(--rgb-bg), 0.86);
+  }
+
+  .ic-spec dt {
+    color: var(--color-fg-muted);
+  }
+
+  .ic-spec dd {
+    margin: 0;
+    font-size: clamp(1.4rem, 2.4vw, 2.2rem);
+    font-weight: 500;
+    letter-spacing: -0.02em;
+    color: var(--color-fg);
+  }
+
+  @media (min-width: 900px) {
+    .ic-scene {
+      min-height: 1px;
+    }
+
+    .ic-copy {
+      position: relative;
+      max-width: 30rem;
+    }
+
+    /* The flight passes behind the copy, so it gets a soft dark backing. */
+    .ic-copy::before {
+      content: '';
+      position: absolute;
+      inset: -2.5rem -3rem;
+      z-index: -1;
+      background: radial-gradient(closest-side, rgba(var(--rgb-bg), 0.88), rgba(var(--rgb-bg), 0.6) 60%, transparent);
+    }
+
+    .ic-copy :global(.lede) {
+      color: var(--color-fg);
+      opacity: 0.86;
+    }
+
+    .ic-split {
+      grid-template-columns: minmax(0, 1.5fr) minmax(0, 0.5fr);
+      align-items: center;
+    }
+
+    .ic-split__side {
+      grid-area: 1 / 2;
+    }
+
+    .ic-seeker .ic-device {
+      grid-area: 1 / 1;
+    }
+
+    .ic-seeker :global(.headline) {
+      font-size: clamp(1.5rem, 2.1vw, 2.2rem);
+    }
+
+    .ic-seeker :global(.lede) {
+      font-size: 0.95rem;
+    }
+
+    .ic-seeker.is-pinned .ic-device {
+      --in: clamp(0, var(--p) * 8, 1);
+      width: min(100%, 60rem, calc((100vh - 15rem) * 1.6));
+      opacity: var(--in);
+      transform: translateX(calc((1 - var(--in)) * -3rem)) scale(calc(0.94 + var(--in) * 0.06));
+      transform-origin: left center;
+    }
+
+    .ic-specs__grid {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+  }
+</style>

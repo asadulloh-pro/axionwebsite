@@ -1,11 +1,15 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import IntroStage from './sections/IntroStage.astro';
-import Capabilities from './sections/Capabilities.astro';
-import Solutions from './sections/Solutions.astro';
-import Technologies from './sections/Technologies.astro';
-import Partners from './sections/Partners.astro';
-import CTA from './sections/CTA.astro';
+import StoryRail from './story/StoryRail.astro';
+import Prologue from './story/Prologue.astro';
+import Problem from './story/Problem.astro';
+import Interceptor from './story/Interceptor.astro';
+import Nexus from './story/Nexus.astro';
+import Decide from './story/Decide.astro';
+import Field from './story/Field.astro';
+import Missions from './story/Missions.astro';
+import Stack from './story/Stack.astro';
+import Epilogue from './story/Epilogue.astro';
 import { getDictionary, type Locale } from '../i18n';
 import { localizePath } from '../lib/paths';
 
@@ -18,10 +22,116 @@ const dict = getDictionary(locale);
 ---
 
 <Layout locale={locale} canonicalPath={localizePath('', locale)}>
-  <IntroStage dict={dict} locale={locale} />
-  <Capabilities dict={dict} />
-  <Solutions dict={dict} locale={locale} />
-  <Technologies dict={dict} />
-  <Partners dict={dict} />
-  <CTA dict={dict} locale={locale} />
+  <div class="webgl-stage" data-webgl aria-hidden="true">
+    <picture class="webgl-stage__still">
+      <source srcset="/media/story/terrain-still.avif" type="image/avif" />
+      <source srcset="/media/story/terrain-still.webp" type="image/webp" />
+      <img src="/media/story/terrain-still.jpg" alt="" width="1920" height="1080" fetchpriority="low" />
+    </picture>
+    <div class="webgl-stage__veil"></div>
+    <div class="webgl-stage__ambient"></div>
+  </div>
+
+  <div class="story" data-story>
+    <Prologue dict={dict} />
+    <Problem dict={dict} locale={locale} />
+    <Interceptor dict={dict} locale={locale} />
+    <Nexus dict={dict} />
+    <Decide dict={dict} />
+    <Field dict={dict} />
+    <Missions dict={dict} locale={locale} />
+    <Stack dict={dict} locale={locale} />
+    <Epilogue dict={dict} locale={locale} />
+  </div>
+  <StoryRail first={dict.story.rail[0]} total={dict.story.rail.length} />
 </Layout>
+
+<script>
+  import { initStory } from '../scripts/story';
+  import { initWebGL } from '../scripts/webgl';
+  initStory();
+  initWebGL(document.querySelector<HTMLElement>('[data-webgl]'));
+
+  /* The coloured ambient light belongs to the hero only; it fades out as the first chapter scrolls away. */
+  const ambient = document.querySelector<HTMLElement>('.webgl-stage__ambient');
+  const hero = document.querySelector<HTMLElement>('[data-story] > *');
+  if (ambient && hero) {
+    let queued = false;
+    const fade = () => {
+      queued = false;
+      const frame = hero.parentElement?.classList.contains('pin-spacer') ? hero.parentElement : hero;
+      const rect = frame.getBoundingClientRect();
+      const left = (rect.bottom - window.innerHeight * 0.35) / (window.innerHeight * 0.65);
+      ambient.style.opacity = String(Math.min(1, Math.max(0, left)));
+    };
+    const queue = () => {
+      if (queued) return;
+      queued = true;
+      requestAnimationFrame(fade);
+    };
+    window.addEventListener('scroll', queue, { passive: true });
+    window.addEventListener('resize', queue);
+    fade();
+  }
+</script>
+
+<style>
+  .story {
+    position: relative;
+    z-index: 1;
+  }
+
+  .webgl-stage {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  .webgl-stage :global(canvas) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    transition: opacity 0.8s ease;
+  }
+
+  .webgl-stage.is-live :global(canvas) {
+    opacity: 1;
+  }
+
+  .webgl-stage__still img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0.85;
+    transition: opacity 2.4s ease;
+  }
+
+  /* The live scene starts flat and grows its relief, so the mountain still is only for tiers that keep it. */
+  :global(html.js) .webgl-stage:not([data-tier='low']):not([data-tier='static']) .webgl-stage__still img,
+  .webgl-stage.is-live .webgl-stage__still img {
+    opacity: 0;
+  }
+
+  .webgl-stage__ambient {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 55% 50% at 0% 105%, rgba(var(--rgb-cyan), 0.42), transparent 70%),
+      radial-gradient(ellipse 50% 65% at 105% 90%, rgba(98, 52, 210, 0.5), transparent 70%),
+      radial-gradient(ellipse 60% 50% at 0% 0%, rgba(var(--rgb-blue), 0.22), transparent 70%);
+    mix-blend-mode: screen;
+  }
+
+  .webgl-stage__veil {
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(90deg, rgba(var(--rgb-bg), 0.5) 0%, rgba(var(--rgb-bg), 0.12) 50%, transparent 75%),
+      linear-gradient(180deg, rgba(var(--rgb-bg), 0.5) 0%, transparent 25%, transparent 75%, rgba(var(--rgb-bg), 0.7) 100%);
+  }
+</style>

@@ -20,13 +20,6 @@ export interface NavItem {
   href: string;
 }
 
-export interface Capability {
-  id: string;
-  title: string;
-  description: string;
-  icon: string;
-}
-
 export interface Solution {
   id: string;
   index: string;
@@ -49,6 +42,218 @@ export interface Partner {
   name: string;
   description: string;
   logo: string;
+}
+
+export type DeviceId = 'radar' | 'lidar' | 'camera' | 'jammer' | 'uav' | 'interceptor';
+
+export interface StoryDevice {
+  id: DeviceId;
+  name: string;
+  short: string;
+  detail: string;
+  /** Short readout shown on the device panel in the problem chapter */
+  readout: string;
+}
+
+export interface Story {
+  rail: string[];
+  devices: StoryDevice[];
+  prologue: {
+    titleLines: string[];
+    subtitle: string;
+    scrollCue: string;
+    renderNote: string;
+  };
+  /** Chapter 01: the C2 / C4 project teaser that links to its detail page. */
+  problem: {
+    label: string;
+    title: string;
+    body: string;
+    lines: { name: string; text: string }[];
+    cta: string;
+  };
+  /** Chapter 02: the interceptor drone project teaser that links to its detail page. */
+  interceptor: {
+    label: string;
+    title: string;
+    body: string;
+    specs: { value: string; label: string }[];
+    cta: string;
+    /** Target lock frame that follows the drone in the scene */
+    lock: { target: string; tracking: string; locked: string; destroyed: string };
+  };
+  nexus: {
+    label: string;
+    title: string;
+    body: string;
+    /** Integration, autonomy, one screen */
+    pillars: { title: string; body: string }[];
+    /** Labels of the border scenario on the relief */
+    scene: {
+      border: string;
+      vibration: string;
+      camera: string;
+      /** Object class shown on the intruder frame, e.g. "Person" (rendered as "Person ×3") */
+      person: string;
+      alert: { title: string; status: string; range: string };
+    };
+    caption: string;
+  };
+  decide: {
+    label: string;
+    title: string;
+    steps: { title: string; body: string; status: string }[];
+    closing: string;
+    confirm: string;
+  };
+  field: {
+    label: string;
+    title: string;
+    cards: { title: string; body: string }[];
+  };
+  missions: {
+    label: string;
+    title: string;
+    items: { id: string; title: string; body: string; tags: string[] }[];
+    link: string;
+  };
+  stack: {
+    label: string;
+    title: string;
+    items: { title: string; body: string }[];
+    link: string;
+  };
+  epilogue: {
+    title: string;
+    body: string;
+    primary: string;
+    secondary: string;
+    partnersLabel: string;
+  };
+}
+
+export interface StoryBeat {
+  label: string;
+  title: string;
+  body: string;
+}
+
+export interface ProjectC2C4 {
+  metaTitle: string;
+  metaDescription: string;
+  breadcrumb: string;
+  rail: string[];
+  intro: StoryBeat & { scrollCue: string };
+  site: StoryBeat;
+  c2: StoryBeat;
+  network: StoryBeat;
+  c4: StoryBeat;
+  c2ui: {
+    title: string;
+    live: string;
+    status: string;
+    devicesLabel: string;
+    /** Camera, radar, jammer, RF sensor, lidar, in the order they rise on the site */
+    devices: string[];
+    connected: string;
+    threat: string;
+    tracked: string;
+    jamming: string;
+    /** Boot line shown while the screen powers on */
+    linking: string;
+    mapLabel: string;
+    /** Name of the site this C2 runs on */
+    site: string;
+    tabs: string[];
+    mqtt: string;
+    detectionsLabel: string;
+    noDetections: string;
+    confidence: string;
+    high: string;
+    model: string;
+    fields: { freq: string; rssi: string; alt: string; speed: string; dist: string; bearing: string; pilot: string };
+    /** Camera, lock target, jammer focus, match frequency */
+    actions: string[];
+    cameraLabel: string;
+    locked: string;
+    jammingLabel: string;
+    standby: string;
+    active: string;
+    spectrumLabel: string;
+    /** Event log lines: RF detection, radar track, camera lock, jamming */
+    log: string[];
+    leaving: string;
+    /** Story steps shown under the laptop: devices, detection, confirmation, response */
+    steps: string[];
+  };
+  c4ui: {
+    title: string;
+    live: string;
+    linking: string;
+    /** Header tabs, first one active */
+    tabs: string[];
+    /** KPI cards: current detections, unidentified, incidents, control nodes */
+    kpis: string[];
+    today: string;
+    online: string;
+    offline: string;
+    monitoring: string;
+    /** Monitoring panel segments: nodes, detections */
+    segments: string[];
+    search: string;
+    /** One name per C2 site, main site first; the third one raises the incident */
+    sites: string[];
+    zonesLabel: string;
+    nodeUnit: string;
+    confidence: string;
+    unidentified: string;
+    model: string;
+    alt: string;
+    detected: string;
+    incidentsLabel: string;
+    noIncidents: string;
+    incidentType: string;
+    openC2: string;
+    devicesLabel: string;
+    /** Story steps shown under the wall: sites, detection, incident, hand-off */
+    steps: string[];
+  };
+  caption: string;
+}
+
+export interface ProjectInterceptor {
+  metaTitle: string;
+  metaDescription: string;
+  breadcrumb: string;
+  rail: string[];
+  intro: StoryBeat & { scrollCue: string };
+  threat: StoryBeat;
+  launch: StoryBeat;
+  seeker: StoryBeat;
+  impact: StoryBeat;
+  specs: StoryBeat & { items: { value: string; label: string }[] };
+  seekerUi: {
+    title: string;
+    rec: string;
+    /** Onboard AI, no GPS, no radar */
+    badges: string[];
+    /** Search, track, lock, terminal, impact */
+    stages: string[];
+    target: string;
+    track: string;
+    confidence: string;
+    range: string;
+    speed: string;
+    held: string;
+    operator: string;
+    approved: string;
+    abort: string;
+    terminal: string;
+    destroyed: string;
+    /** Story steps shown under the seeker view */
+    steps: string[];
+  };
+  caption: string;
 }
 
 export interface FormField {
@@ -74,24 +279,11 @@ export interface Dictionary {
     contact: string;
     cta: string;
   };
-  hero: {
-    label: string;
-    title: string;
-    /** Preferred visual line breaks for the hero headline */
-    titleLines: string[];
-    subtitle: string;
-    primaryCta: string;
-    secondaryCta: string;
-  };
+  story: Story;
   company: {
     label: string;
     title: string;
     body: string;
-  };
-  capabilities: {
-    label: string;
-    title: string;
-    items: Capability[];
   };
   solutions: {
     label: string;
@@ -125,6 +317,10 @@ export interface Dictionary {
     missionBody: string;
     approachTitle: string;
     principles: { title: string; body: string }[];
+  };
+  projectsPage: {
+    c2c4: ProjectC2C4;
+    interceptor: ProjectInterceptor;
   };
   solutionsPage: {
     metaTitle: string;

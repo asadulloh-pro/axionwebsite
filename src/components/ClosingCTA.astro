@@ -1,0 +1,62 @@
+---
+import type { Dictionary, Locale } from '../i18n/types';
+import { localizePath } from '../lib/paths';
+
+interface Props {
+  dict: Dictionary;
+  locale: Locale;
+}
+
+const { dict, locale } = Astro.props;
+---
+
+<section class="cta">
+  <div class="container-axion">
+    <div class="cta__panel panel reveal">
+      <div>
+        <h2 class="headline headline--sm cta__title">{dict.cta.title}</h2>
+        <p class="cta__body">{dict.cta.body}</p>
+      </div>
+      <a href={localizePath('contact', locale)} class="btn btn--primary">
+        {dict.cta.button}
+        <span class="btn__arrow" aria-hidden="true">→</span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<style>
+  .cta {
+    padding-block: clamp(4rem, 9vw, 7rem);
+  }
+
+  .cta__panel {
+    display: grid;
+    gap: 2rem;
+    align-items: center;
+    padding: clamp(2rem, 5vw, 3.5rem);
+    background:
+      radial-gradient(ellipse 55% 120% at 0% 110%, rgba(var(--rgb-cyan), 0.45), transparent 65%),
+      radial-gradient(ellipse 50% 120% at 100% 100%, rgba(98, 52, 210, 0.5), transparent 65%),
+      radial-gradient(ellipse 60% 80% at 20% 0%, rgba(var(--rgb-blue), 0.22), transparent 70%),
+      var(--color-bg);
+    border-color: rgba(var(--rgb-fg), 0.12);
+  }
+
+  @media (min-width: 900px) {
+    .cta__panel {
+      grid-template-columns: minmax(0, 1fr) auto;
+    }
+  }
+
+  .cta__title {
+    max-width: 24ch;
+  }
+
+  .cta__body {
+    margin-top: 1rem;
+    max-width: 40rem;
+    color: var(--color-fg-muted);
+    line-height: 1.6;
+  }
+</style>

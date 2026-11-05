@@ -1,7 +1,8 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import Technologies from './sections/Technologies.astro';
-import CTA from './sections/CTA.astro';
+import PageHero from './PageHero.astro';
+import ClosingCTA from './ClosingCTA.astro';
+import DeviceIcon from './story/DeviceIcon.astro';
 import { getDictionary, type Locale } from '../i18n';
 import { localizePath } from '../lib/paths';
 
@@ -40,69 +41,89 @@ const breadcrumb = {
   canonicalPath={localizePath('technologies', locale)}
   jsonLd={breadcrumb}
 >
-  <section class="ops page-intro">
-    <div class="ops-hero ops-hero--compact ops-hero--plain">
-      <div class="ops-veil" aria-hidden="true"></div>
-      <div class="container-axion ops-hero__inner">
-        <div class="ops-meta reveal">
-          <span class="ops-meta__live"></span>
-          <span>{page.label}</span>
-          <span class="ops-meta__sep" aria-hidden="true"></span>
-          <span>TECH</span>
+  <PageHero label={page.label} title={page.title} subtitle={page.subtitle} />
+
+  <section class="section-pad">
+    <div class="container-axion">
+      <ol class="row-list">
+        {dict.technologies.items.map((item, i) => (
+          <li class="row reveal" style={`transition-delay: ${i * 50}ms`}>
+            <span class="row__idx">{item.index.replace(/[\[\]]/g, '')}</span>
+            <h2 class="row__title">{item.title}</h2>
+            <p class="row__body">{item.description}</p>
+          </li>
+        ))}
+      </ol>
+    </div>
+  </section>
+
+  <section class="tech-integration">
+    <div class="container-axion">
+      <div class="tech-integration__panel panel reveal">
+        <div class="tech-integration__copy">
+          <h2 class="headline headline--sm">{page.integrationTitle}</h2>
+          <p class="tech-integration__body">{page.integrationBody}</p>
         </div>
-        <div class="ops-copy ops-copy--wide reveal" style="transition-delay: 80ms">
-          <div class="ops-reticle" aria-hidden="true">
-            <i></i><i></i><i></i><i></i>
-          </div>
-          <h1 class="ops-title">{page.title}</h1>
-          <p class="ops-body">{page.subtitle}</p>
-        </div>
+        <ul class="tech-integration__devices" aria-label={dict.technologiesPage.integrationTitle}>
+          {dict.story.devices.map((device) => (
+            <li>
+              <DeviceIcon id={device.id} size={22} />
+              <span>{device.short}</span>
+            </li>
+          ))}
+        </ul>
       </div>
     </div>
   </section>
 
-  <Technologies dict={dict} showHeader={false} />
-
-  <section class="ops">
-    <div class="ops-strip">
-      <div class="container-axion ops-strip__grid ops-strip__grid--2">
-        <article class="ops-item reveal">
-          <span class="ops-item__idx">01</span>
-          <div>
-            <h3>{page.integrationTitle}</h3>
-            <p>{page.integrationBody}</p>
-          </div>
-        </article>
-        <article class="ops-item reveal" style="transition-delay: 60ms">
-          <span class="ops-item__idx">02</span>
-          <div class="ops-integrity">
-            <img src="/icons/integrity-off.svg" alt="" width="120" height="80" loading="lazy" />
-            <img src="/icons/integrity-on.svg" alt="" width="120" height="80" loading="lazy" />
-          </div>
-        </article>
-      </div>
-    </div>
-  </section>
-
-  <CTA dict={dict} locale={locale} />
+  <ClosingCTA dict={dict} locale={locale} />
 </Layout>
 
 <style>
-  .page-intro {
-    border-top: 0;
-    padding-top: 4.5rem;
+  .tech-integration__panel {
+    display: grid;
+    gap: 2.5rem;
+    padding: clamp(2rem, 5vw, 3.5rem);
+    background: var(--color-bg-elevated);
   }
 
-  .ops-integrity {
+  @media (min-width: 900px) {
+    .tech-integration__panel {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      align-items: center;
+    }
+  }
+
+  .tech-integration__body {
+    margin-top: 1rem;
+    color: var(--color-fg-muted);
+    line-height: 1.65;
+  }
+
+  .tech-integration__devices {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.75rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .tech-integration__devices li {
     display: flex;
+    flex-direction: column;
     align-items: center;
-    gap: 1.5rem;
-    opacity: 0.85;
-    min-height: 100%;
+    gap: 0.6rem;
+    padding: 1.1rem 0.5rem;
+    border: 1px solid var(--color-border);
+    font-family: var(--font-mono);
+    font-size: 0.66rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--color-fg-muted);
   }
 
-  .ops-integrity img {
-    height: 4rem;
-    width: auto;
+  .tech-integration__devices :global(svg) {
+    color: var(--color-accent-soft);
   }
 </style>

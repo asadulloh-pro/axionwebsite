@@ -13,17 +13,32 @@ const dict = getDictionary(locale);
   description={dict.notFound.body}
   canonicalPath={localizePath('', locale)}
 >
-  <section class="min-h-[80dvh] flex items-center pt-24">
-    <div class="container-axion text-center max-w-xl mx-auto">
-      <p class="font-mono text-accent text-sm tracking-widest mb-4">404</p>
-      <h1 class="text-3xl md:text-5xl font-semibold mb-4">{dict.notFound.title}</h1>
-      <p class="text-fg-muted mb-8">{dict.notFound.body}</p>
-      <a
-        href={localizePath('', locale)}
-        class="inline-flex items-center rounded-full bg-accent px-6 py-3 text-sm font-medium text-white transition hover:brightness-110"
-      >
-        {dict.notFound.cta}
-      </a>
+  <section class="page-hero not-found">
+    <div class="container-axion not-found__inner">
+      <p class="kicker">
+        <span class="kicker__idx">404</span>
+        <span class="kicker__rule" aria-hidden="true"></span>
+        <span>{dict.meta.siteName}</span>
+      </p>
+      <h1 class="headline headline--md" data-split="load">{dict.notFound.title}</h1>
+      <p class="lede">{dict.notFound.body}</p>
+      <a href={localizePath('', locale)} class="btn btn--primary">{dict.notFound.cta}</a>
     </div>
   </section>
 </Layout>
+
+<style>
+  .not-found {
+    display: flex;
+    align-items: center;
+    min-height: 80dvh;
+    border-bottom: 0;
+  }
+
+  .not-found__inner {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1.5rem;
+  }
+</style>

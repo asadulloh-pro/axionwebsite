@@ -1,0 +1,341 @@
+---
+import type { Dictionary } from '../../i18n/types';
+import ChapterIntro from './ChapterIntro.astro';
+
+/*
+ * Home projects chapter 03: Nexus, the border-control platform. The scenario plays on the relief behind the
+ * copy (nexus-layer.ts): a border is drawn, cameras and buried vibration sensors come online, intruders walk
+ * in, the sensors detect them and an alert is raised. The callouts below are positioned by the WebGL stage.
+ */
+interface Props {
+  dict: Dictionary;
+}
+
+const { dict } = Astro.props;
+const t = dict.story.nexus;
+const s = t.scene;
+---
+
+<section
+  id="nexus"
+  class="chapter nexus"
+  data-chapter
+  data-pin
+  data-nexus
+  data-length="2.8"
+  data-rail={dict.story.rail[3]}
+  aria-labelledby="nexus-title"
+>
+  <div class="container-axion chapter__stage">
+    <div class="chapter__grid">
+      <div class="chapter__copy">
+        <ChapterIntro id="nexus-title" index={3} label={t.label} title={t.title} body={t.body} />
+        <dl class="nexus__pillars">
+          {t.pillars.map((pillar) => (
+            <div class="nexus__pillar">
+              <dt>{pillar.title}</dt>
+              <dd>{pillar.body}</dd>
+            </div>
+          ))}
+        </dl>
+      </div>
+      <div class="nexus__scene" aria-hidden="true"></div>
+    </div>
+  </div>
+
+  <div class="nx-layer" aria-hidden="true">
+    <svg class="nx-layer__svg">
+      <line class="nx-sight" data-nx-sight x1="0" y1="0" x2="0" y2="0"></line>
+    </svg>
+    <span class="nx-tag nx-tag--border" data-nx-border>{s.border}</span>
+    <span class="nx-tag nx-tag--hit" data-nx-vib><i></i>{s.vibration} · S-07</span>
+    <span class="nx-tag nx-tag--hit nx-tag--down" data-nx-cam><i></i>{s.camera} · Cam-105</span>
+    <div class="nx-frame" data-nx-frame>
+      <span class="nx-frame__box"><i></i><i></i><i></i><i></i></span>
+      <span class="nx-frame__tag">{s.person} ×3</span>
+    </div>
+    <div class="nx-alert" data-nx-alert>
+      <span class="nx-alert__card">
+        <span class="nx-alert__title">{s.alert.title}</span>
+        <em class="nx-alert__status">● {s.alert.status}</em>
+        <span class="nx-alert__row"><b>Cam-105</b><span>S-07</span></span>
+        <span class="nx-alert__row"><span>{s.alert.range}</span><b>1.0 km</b></span>
+      </span>
+    </div>
+  </div>
+  <p class="nx-caption hud">{t.caption}</p>
+</section>
+
+<style>
+  .nexus {
+    position: relative;
+    --red: 255, 79, 122;
+  }
+
+  .nexus__scene {
+    min-height: 40svh;
+  }
+
+  @media (min-width: 900px) {
+    .nexus__scene {
+      min-height: 1px;
+    }
+  }
+
+  .nexus__pillars {
+    display: grid;
+    margin: 0;
+    border-top: 1px solid var(--color-border);
+  }
+
+  .nexus__pillar {
+    display: grid;
+    grid-template-columns: 8.5rem 1fr;
+    gap: 1rem;
+    padding: 0.8rem 0;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .nexus__pillar dt {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-accent-soft);
+  }
+
+  .nexus__pillar dd {
+    margin: 0;
+    font-size: 0.92rem;
+    color: var(--color-fg);
+    opacity: 0.86;
+  }
+
+  /* Scenario callouts: positioned every frame by the WebGL stage over the relief. */
+  .nx-layer {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    overflow: hidden;
+    pointer-events: none;
+    opacity: 0;
+  }
+
+  @media (max-width: 899px) {
+    .nx-layer {
+      display: none;
+    }
+  }
+
+  .nx-layer__svg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .nx-sight {
+    stroke: rgba(var(--red), 0.6);
+    stroke-width: 1;
+    stroke-dasharray: 4 6;
+    opacity: 0;
+    animation: nx-dash 1s linear infinite;
+  }
+
+  .nx-tag,
+  .nx-frame,
+  .nx-alert {
+    position: absolute;
+    left: 0;
+    top: 0;
+    opacity: 0;
+    will-change: transform, opacity;
+  }
+
+  .nx-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.3rem 0.55rem;
+    margin: -2.4rem 0 0 0.8rem;
+    background: rgba(8, 10, 16, 0.78);
+    border-left: 2px solid #5fd4ff;
+    font-family: var(--font-mono);
+    font-size: 0.66rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    color: rgba(255, 255, 255, 0.92);
+  }
+
+  .nx-tag[data-side='left'] {
+    margin-left: -0.8rem;
+    translate: -100% 0;
+    border-left: 0;
+    border-right: 2px solid #5fd4ff;
+  }
+
+  .nx-tag--hit[data-side='left'] {
+    border-right-color: rgb(var(--red));
+  }
+
+  .nx-alert[data-side='left'] .nx-alert__card {
+    left: auto;
+    right: 2.2rem;
+  }
+
+  .nx-tag--hit {
+    border-left-color: rgb(var(--red));
+  }
+
+  .nx-tag--down {
+    margin-top: 1.6rem;
+  }
+
+  .nx-tag i {
+    width: 0.4rem;
+    height: 0.4rem;
+    border-radius: 999px;
+    background: rgb(var(--red));
+    box-shadow: 0 0 6px rgb(var(--red));
+    animation: nx-blink 0.9s steps(2, jump-none) infinite;
+  }
+
+  .nx-frame {
+    --size: 60px;
+  }
+
+  .nx-frame__box {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: calc(var(--size) * 1.2);
+    height: var(--size);
+    transform: translate(-50%, -50%);
+  }
+
+  .nx-frame__box i {
+    position: absolute;
+    width: 26%;
+    height: 30%;
+    border: 0 solid rgb(var(--red));
+    animation: nx-pulse 1.1s ease-in-out infinite;
+  }
+
+  .nx-frame__box i:nth-child(1) {
+    left: 0;
+    top: 0;
+    border-width: 2px 0 0 2px;
+  }
+
+  .nx-frame__box i:nth-child(2) {
+    right: 0;
+    top: 0;
+    border-width: 2px 2px 0 0;
+  }
+
+  .nx-frame__box i:nth-child(3) {
+    left: 0;
+    bottom: 0;
+    border-width: 0 0 2px 2px;
+  }
+
+  .nx-frame__box i:nth-child(4) {
+    right: 0;
+    bottom: 0;
+    border-width: 0 2px 2px 0;
+  }
+
+  .nx-frame__tag {
+    position: absolute;
+    left: calc(var(--size) * -0.6);
+    top: calc(var(--size) * -0.5 - 1.5rem);
+    padding: 0.15rem 0.4rem;
+    background: rgb(var(--red));
+    font-family: var(--font-mono);
+    font-size: 0.62rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    color: #fff;
+  }
+
+  .nx-alert__card {
+    position: absolute;
+    left: 2.2rem;
+    bottom: 1.2rem;
+    display: grid;
+    gap: 0.2rem;
+    min-width: 13rem;
+    padding: 0.5rem 0.65rem;
+    border-left: 2px solid rgb(var(--red));
+    background: rgba(40, 8, 18, 0.82);
+    font-family: var(--font-mono);
+    font-size: 0.64rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.7);
+  }
+
+  .nx-alert__title {
+    font-size: 0.72rem;
+    color: #fff;
+  }
+
+  .nx-alert__status {
+    font-style: normal;
+    color: rgb(var(--red));
+    animation: nx-blink 0.9s steps(2, jump-none) infinite;
+  }
+
+  .nx-alert__row {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.75rem;
+  }
+
+  .nx-alert__row b {
+    font-weight: 500;
+    color: #fff;
+  }
+
+  .nx-caption {
+    position: absolute;
+    right: 1.5rem;
+    bottom: 1.25rem;
+    z-index: 2;
+    margin: 0;
+    opacity: 0.7;
+    pointer-events: none;
+  }
+
+  @keyframes nx-dash {
+    to {
+      stroke-dashoffset: -20;
+    }
+  }
+
+  @keyframes nx-pulse {
+    50% {
+      opacity: 0.45;
+    }
+  }
+
+  @keyframes nx-blink {
+    0% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0.3;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .nx-sight,
+    .nx-tag i,
+    .nx-frame__box i,
+    .nx-alert__status {
+      animation: none;
+    }
+  }
+</style>

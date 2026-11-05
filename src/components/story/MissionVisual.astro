@@ -1,0 +1,130 @@
+---
+interface Props {
+  id: string;
+}
+
+const { id } = Astro.props;
+
+const nodes = [
+  [80, 90], [210, 60], [330, 120], [470, 70], [560, 160], [140, 220], [290, 250], [420, 230], [530, 300], [90, 330], [240, 360], [380, 340],
+];
+const edges = [
+  [0, 1], [1, 2], [2, 3], [3, 4], [0, 5], [5, 6], [6, 7], [7, 4], [7, 8], [5, 9], [9, 10], [10, 11], [11, 8], [2, 6], [6, 10], [2, 7],
+];
+---
+
+{id === 'defense' ? (
+  <svg viewBox="0 0 640 400" class="mv" aria-hidden="true">
+    <g class="mv__arcs">
+      {[90, 170, 250, 330].map((r) => (
+        <path d={`M${320 - r} 400 A${r} ${r} 0 0 1 ${320 + r} 400`} />
+      ))}
+      {[-60, -30, 0, 30, 60].map((deg) => {
+        const a = ((deg - 90) * Math.PI) / 180;
+        return <line x1="320" y1="400" x2={320 + Math.cos(a) * 340} y2={400 + Math.sin(a) * 340} />;
+      })}
+    </g>
+    <g class="mv__sector">
+      <path d="M320 400 L170 110 A330 330 0 0 1 300 72 Z" />
+    </g>
+    <circle cx="250" cy="170" r="4" class="mv__blip" />
+    <circle cx="430" cy="210" r="4" class="mv__blip mv__blip--2" />
+    <circle cx="380" cy="120" r="4" class="mv__blip mv__blip--3" />
+  </svg>
+) : (
+  <svg viewBox="0 0 640 400" class="mv" aria-hidden="true">
+    <g class="mv__edges">
+      {edges.map(([a, b]) => (
+        <line x1={nodes[a][0] + 20} y1={nodes[a][1]} x2={nodes[b][0] + 20} y2={nodes[b][1]} />
+      ))}
+    </g>
+    <g class="mv__nodes">
+      {nodes.map(([x, y], n) => (
+        <rect x={x + 14} y={y - 6} width="12" height="12" class:list={[{ 'mv__node--hot': n === 7 }]} />
+      ))}
+    </g>
+    {edges.slice(0, 6).map(([a, b], n) => (
+      <circle r="2.5" class="mv__packet">
+        <animateMotion
+          dur={`${2.4 + n * 0.3}s`}
+          repeatCount="indefinite"
+          path={`M${nodes[a][0] + 20} ${nodes[a][1]} L${nodes[b][0] + 20} ${nodes[b][1]}`}
+        />
+      </circle>
+    ))}
+  </svg>
+)}
+
+<style>
+  .mv {
+    width: 100%;
+    height: 100%;
+  }
+
+  .mv__arcs path,
+  .mv__arcs line {
+    fill: none;
+    stroke: rgba(var(--rgb-fg), 0.1);
+  }
+
+  .mv__sector {
+    transform-origin: 320px 400px;
+    animation: mv-sweep 6s ease-in-out infinite alternate;
+  }
+
+  .mv__sector path {
+    fill: rgba(var(--rgb-fg), 0.05);
+    stroke: rgba(var(--rgb-fg), 0.3);
+  }
+
+  .mv__blip {
+    fill: var(--color-accent);
+    animation: mv-blink 2s ease-in-out infinite;
+  }
+
+  .mv__blip--2 {
+    animation-delay: 0.7s;
+  }
+
+  .mv__blip--3 {
+    animation-delay: 1.3s;
+  }
+
+  .mv__edges line {
+    stroke: rgba(var(--rgb-fg), 0.1);
+  }
+
+  .mv__nodes rect {
+    fill: var(--color-bg);
+    stroke: rgba(var(--rgb-fg), 0.35);
+  }
+
+  .mv__nodes .mv__node--hot {
+    fill: rgba(var(--rgb-accent), 0.3);
+    stroke: var(--color-accent);
+    animation: mv-blink 1.6s ease-in-out infinite;
+  }
+
+  .mv__packet {
+    fill: var(--color-fg);
+  }
+
+  @keyframes mv-sweep {
+    from {
+      transform: rotate(-25deg);
+    }
+    to {
+      transform: rotate(55deg);
+    }
+  }
+
+  @keyframes mv-blink {
+    0%,
+    100% {
+      opacity: 0.25;
+    }
+    50% {
+      opacity: 1;
+    }
+  }
+</style>

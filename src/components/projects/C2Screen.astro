@@ -1,0 +1,1301 @@
+---
+import type { DeviceId, ProjectC2C4 } from '../../i18n/types';
+import DeviceIcon from '../story/DeviceIcon.astro';
+
+/*
+ * Rugged field laptop running the C2 dashboard, laid out like the real one: detections on the left, the
+ * site map in the middle, the PTZ camera and jamming bands on the right, spectrum and device health below.
+ * Everything is driven by the enclosing chapter's --p:
+ *   .22 power  .25 boot  .34 UI  .38-.50 devices link  .52 dome  .62 drone detected  .70 camera locks
+ *   .77 jamming  .86 drone turns away  .92 site protected
+ */
+interface Props {
+  ui: ProjectC2C4['c2ui'];
+  caption: string;
+}
+
+const { ui, caption } = Astro.props;
+
+const icons: DeviceId[] = ['camera', 'radar', 'jammer', 'jammer', 'lidar'];
+const linkAt = (i: number) => (0.38 + i * 0.03).toFixed(3);
+
+/* Map: 400x260 user units, the airfield in the middle. */
+const C = { x: 190, y: 140 };
+const markers = ui.devices.map((name, i) => {
+  const a = -2.2 + i * ((Math.PI * 2) / ui.devices.length);
+  return { name, at: linkAt(i), x: C.x + Math.cos(a) * 34, y: C.y + Math.sin(a) * 34 };
+});
+const TARGET = { x: 285, y: 75 };
+const wedge = (from: { x: number; y: number }, spread: number, len: number) => {
+  const a = Math.atan2(TARGET.y - from.y, TARGET.x - from.x);
+  const p = (d: number) => `${(from.x + Math.cos(a + d) * len).toFixed(1)} ${(from.y + Math.sin(a + d) * len).toFixed(1)}`;
+  return `M${from.x.toFixed(1)} ${from.y.toFixed(1)} L${p(-spread)} L${p(spread)} Z`;
+};
+const cameraFov = wedge(markers[0], 0.12, 150);
+const jamSector = wedge(markers[2], 0.26, 135);
+
+const bands = [
+  { f: '433 MHz', on: false },
+  { f: '900 MHz', on: false },
+  { f: '1.5 GHz', on: true },
+  { f: '2.4 GHz', on: true },
+  { f: '5.8 GHz', on: true },
+];
+const logTimes = ['08:41:02', '08:41:04', '08:41:09', '08:41:13'];
+const logAt = [0.62, 0.65, 0.7, 0.77];
+const stepAt = [0.38, 0.62, 0.7, 0.77, 1.01];
+
+/* RF spectrum strip: 0.4-6.0 GHz mapped onto a 600-unit wide plot. */
+const F0 = 0.4;
+const F1 = 6;
+const fx = (f: number) => ((f - F0) / (F1 - F0)) * 600;
+const rand = (i: number) => {
+  const v = Math.sin(i * 91.7 + 3.1) * 43758.5453;
+  return v - Math.floor(v);
+};
+const noise = Array.from({ length: 151 }, (_, i) => `${i ? 'L' : 'M'}${i * 4} ${(34 - rand(i) * 4 - (i % 7 === 0 ? 2 : 0)).toFixed(1)}`).join(' ');
+const peak = (f: number, w: number, h: number) => {
+  const x = fx(f);
+  return `M${(x - w * 2).toFixed(1)} 36 C${(x - w).toFixed(1)} 34 ${(x - w * 0.6).toFixed(1)} ${36 - h} ${x.toFixed(1)} ${36 - h} S${(x + w).toFixed(1)} 34 ${(x + w * 2).toFixed(1)} 36 Z`;
+};
+const axis = [0.4, 0.9, 1.5, 2.4, 3, 4, 5, 5.8].map((f) => ({ f, left: (fx(f) / 600) * 100 }));
+const jamBands = [
+  { f: 1.575, w: 0.12 },
+  { f: 2.44, w: 0.1 },
+  { f: 5.8, w: 0.15 },
+].map((b) => ({ x: fx(b.f - b.w / 2), w: fx(b.f + b.w / 2) - fx(b.f - b.w / 2) }));
+---
+
+<figure class="c2s">
+  <div class="c2s__device">
+    <div class="c2s__glow" aria-hidden="true"></div>
+    <img class="c2s__laptop" src="/images/rugged-laptop.webp" width="884" height="725" alt="" loading="lazy" decoding="async" />
+    <div class="c2s__screen" data-screen>
+      <div class="c2s__display">
+        <div class="c2s__boot" aria-hidden="true">
+          <span class="c2s__boot-mark">{ui.title}</span>
+          <span class="c2s__boot-line">{ui.linking}</span>
+          <span class="c2s__boot-bar"><i></i></span>
+        </div>
+
+        <div class="c2" role="img" aria-label={`${ui.title}: ${ui.steps.join(', ')}. ${ui.status}`}>
+          <header class="c2__bar">
+            <span class="c2__brand">{ui.title}</span>
+            <span class="c2__site">{ui.site}</span>
+            <nav class="c2__tabs">
+              {ui.tabs.map((tab, i) => <span class:list={['c2__tab', { 'is-on': i === 0 }]}>{tab}</span>)}
+            </nav>
+            <span class="c2__mqtt"><i></i>{ui.mqtt}</span>
+            <span class="c2__clock">08:41:13</span>
+            <span class="c2__live"><i></i>{ui.live}</span>
+          </header>
+
+          <div class="c2__body">
+            <aside class="c2__col c2__col--left">
+              <p class="c2__label">
+                {ui.detectionsLabel}
+                <b class="c2__count"><span class="off">0</span><span class="on">1</span></b>
+              </p>
+              <div class="c2__stack">
+              <div class="c2__empty">{ui.noDetections}</div>
+              <article class="c2__card">
+                <div class="c2__card-top">
+                  <span class="c2__badge">{ui.confidence}: {ui.high}</span>
+                </div>
+                <p class="c2__model">{ui.model}</p>
+                <p class="c2__id">ID 1581F6Q8D23</p>
+                <dl class="c2__chips">
+                  <div class="c2__chip c2__chip--g"><dt>{ui.fields.freq}</dt><dd>2.437 GHz</dd></div>
+                  <div class="c2__chip c2__chip--g"><dt>{ui.fields.rssi}</dt><dd>−64 dBm</dd></div>
+                  <div class="c2__chip c2__chip--g"><dt>{ui.fields.alt}</dt><dd>118 m</dd></div>
+                  <div class="c2__chip c2__chip--i"><dt>{ui.fields.speed}</dt><dd>12 m/s</dd></div>
+                  <div class="c2__chip c2__chip--y"><dt>{ui.fields.bearing}</dt><dd>038°</dd></div>
+                  <div class="c2__chip c2__chip--i"><dt>{ui.fields.dist}</dt><dd>820 m</dd></div>
+                  <div class="c2__chip c2__chip--y c2__chip--wide"><dt>{ui.fields.pilot}</dt><dd>1.9 km · 052°</dd></div>
+                </dl>
+                <div class="c2__actions">
+                  {ui.actions.map((label, i) => (
+                    <span class:list={['c2__action', { 'c2__action--cam': i === 0, 'c2__action--jam': i === 2 }]}>{label}</span>
+                  ))}
+                </div>
+              </article>
+              </div>
+            </aside>
+
+            <div class="c2__map">
+              <svg viewBox="50 0 310 260" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+                <defs>
+                  <pattern id="c2-grid" width="40" height="40" patternUnits="userSpaceOnUse">
+                    <path d="M40 0H0V40" class="c2__grid" />
+                  </pattern>
+                  <radialGradient id="c2-ground" cx="0.45" cy="0.55" r="0.75">
+                    <stop offset="0" stop-color="#16212f" />
+                    <stop offset="1" stop-color="#080d16" />
+                  </radialGradient>
+                  <radialGradient id="c2-sweep" cx="0" cy="0" r="1">
+                    <stop offset="0" stop-color="rgb(120,140,255)" stop-opacity="0.35" />
+                    <stop offset="1" stop-color="rgb(120,140,255)" stop-opacity="0" />
+                  </radialGradient>
+                </defs>
+                <rect width="400" height="260" fill="url(#c2-ground)" />
+                <path d="M-10 40 C80 20 150 64 230 40 S340 10 410 30" class="c2__contour" />
+                <path d="M-10 220 C80 192 160 240 250 212 S350 184 410 202" class="c2__contour" />
+                <path d="M-10 244 C90 222 170 258 260 236 S360 212 410 228" class="c2__contour" />
+                <path d="M300 260 C300 210 330 180 410 170" class="c2__road" />
+                <path d="M-10 120 C40 126 90 150 140 150" class="c2__road" />
+                <rect width="400" height="260" fill="url(#c2-grid)" />
+
+                <g transform={`rotate(-18 ${C.x} ${C.y})`}>
+                  <rect x={C.x - 70} y={C.y - 6} width="140" height="12" class="c2__runway" />
+                  <path d={`M${C.x - 62} ${C.y}H${C.x + 62}`} class="c2__runway-line" />
+                  <path d={`M${C.x - 30} ${C.y + 6}V${C.y + 22}H${C.x + 10}V${C.y + 6}`} class="c2__taxi" />
+                </g>
+
+                <circle cx={C.x} cy={C.y} r="110" class="c2__ring" />
+                <circle cx={C.x} cy={C.y} r="55" class="c2__ring" />
+                <text x={C.x + 112} y={C.y - 3} class="c2__ring-label">1 km</text>
+                <text x={C.x + 57} y={C.y - 3} class="c2__ring-label">500 m</text>
+
+                <g class="c2__sweep">
+                  <path d={`M${C.x} ${C.y} L${C.x + 110} ${C.y} A110 110 0 0 0 ${C.x + 95} ${C.y - 55} Z`} fill="url(#c2-sweep)" />
+                </g>
+
+                {markers.map((m) => (
+                  <circle cx={m.x.toFixed(1)} cy={m.y.toFixed(1)} r="30" class="c2__cover rv" style={`--at:${m.at}`} />
+                ))}
+                <circle cx={C.x} cy={C.y} r="80" class="c2__dome" pathLength="1" />
+
+                <path d={cameraFov} class="c2__fov rv" style="--at:0.7" />
+                <path d={jamSector} class="c2__jam rv" style="--at:0.77" />
+
+                {markers.map((m) => (
+                  <g class="rv" style={`--at:${m.at}`} transform={`translate(${m.x.toFixed(1)} ${m.y.toFixed(1)})`}>
+                    <circle r="3.4" class="c2__marker" />
+                    <circle r="7" class="c2__marker-ring" />
+                  </g>
+                ))}
+
+                <g class="rv" style="--at:0.62">
+                  <path d={`M398 8 L360 32 L${TARGET.x} ${TARGET.y}`} class="c2__trail" pathLength="1" />
+                  <g class="c2__pilot" transform="translate(322 128)">
+                    <rect x="-3.5" y="-3.5" width="7" height="7" />
+                    <text x="7" y="3">{ui.fields.pilot}</text>
+                  </g>
+                </g>
+                <path d={`M322 128 L${TARGET.x} ${TARGET.y}`} class="c2__pilot-link rv" style="--at:0.7" />
+
+                <g class="c2__drone">
+                  <g class="c2__threat">
+                    <path d="M0 -6 L6 0 L0 6 L-6 0 Z" />
+                    <circle r="12" class="c2__threat-ring" />
+                    <text x="-10" y="-15" class="c2__track-id">TRK-0217</text>
+                  </g>
+                </g>
+
+                <g class="c2__north" transform="translate(344 244)">
+                  <path d="M0 -9 L4 3 L0 0 L-4 3 Z" />
+                  <text y="10">N</text>
+                </g>
+                <g transform="translate(60 248)">
+                  <path d="M0 0H55" class="c2__scale" />
+                  <text x="0" y="-3" class="c2__ring-label">500 m</text>
+                </g>
+              </svg>
+
+              <ol class="c2__log">
+                {ui.log.map((line, i) => (
+                  <li class="rv" style={`--at:${logAt[i]}`}><time>{logTimes[i]}</time>{line}</li>
+                ))}
+              </ol>
+
+              <div class="c2__tools" aria-hidden="true"><span>+</span><span>−</span><span>2D</span></div>
+            </div>
+
+            <aside class="c2__col c2__col--right">
+              <div class="c2__cam">
+                <p class="c2__label">{ui.cameraLabel}</p>
+                <div class="c2__feed">
+                  <svg viewBox="0 0 160 96" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+                    <defs>
+                      <linearGradient id="c2-sky" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0" stop-color="#1b2230" />
+                        <stop offset="1" stop-color="#3a4251" />
+                      </linearGradient>
+                    </defs>
+                    <rect width="160" height="96" fill="url(#c2-sky)" />
+                    <path d="M0 78 L18 70 L34 74 L52 64 L70 72 L92 62 L112 70 L130 66 L160 74 V96 H0 Z" class="c2__hills" />
+                    <g class="c2__cam-drone">
+                      <path d="M-7 0 H7 M-4 -2 L4 2 M-4 2 L4 -2" class="c2__quad" />
+                      <circle cx="-7" cy="0" r="2.4" class="c2__rotor" />
+                      <circle cx="7" cy="0" r="2.4" class="c2__rotor" />
+                      <rect x="-2" y="-1.5" width="4" height="3" class="c2__body-q" />
+                      <path d="M-14 -9 h5 M-14 -9 v5 M14 -9 h-5 M14 -9 v5 M-14 9 h5 M-14 9 v-5 M14 9 h-5 M14 9 v-5" class="c2__lock" />
+                    </g>
+                    <path d="M80 40 V56 M72 48 H88" class="c2__cross" />
+                  </svg>
+                  <span class="c2__feed-tag c2__feed-tag--rec">REC</span>
+                  <span class="c2__feed-tag c2__feed-tag--lock">{ui.locked}</span>
+                  <span class="c2__feed-read">AZ 038° · EL 12° · ×24</span>
+                </div>
+              </div>
+
+              <div class="c2__jamming">
+                <p class="c2__label">{ui.jammingLabel}</p>
+                <ul class="c2__bands">
+                  {bands.map((b) => (
+                    <li class:list={['c2__band', { 'c2__band--on': b.on }]}>
+                      <span class="c2__band-f">{b.f}</span>
+                      <span class="c2__band-bar"><i></i></span>
+                      <span class="c2__band-state">
+                        <span class="off">{ui.standby}</span>
+                        {b.on && <span class="on">{ui.active}</span>}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </aside>
+          </div>
+
+          <section class="c2__spec">
+            <p class="c2__label">
+              <span>{ui.spectrumLabel} · {ui.devices[3]}</span>
+              <span class="c2__spec-range">0.4 – 6.0 GHz · RBW 100 kHz</span>
+            </p>
+            <div class="c2__spec-plot">
+              <svg viewBox="0 0 600 36" preserveAspectRatio="none" aria-hidden="true">
+                <path d="M0 9H600M0 18H600M0 27H600" class="c2__spec-grid" />
+                {jamBands.map((b) => <rect x={b.x.toFixed(1)} y="0" width={b.w.toFixed(1)} height="36" class="c2__spec-jam" />)}
+                <path d={noise} class="c2__noise" />
+                <path d={peak(2.437, 5, 30)} class="c2__peak" />
+                <path d={peak(5.8, 4, 18)} class="c2__peak c2__peak--2" />
+                <path d={peak(1.575, 2, 7)} class="c2__peak c2__peak--3" />
+              </svg>
+              <div class="c2__fall" aria-hidden="true">
+                <i style={`left:${((fx(2.437) / 600) * 100).toFixed(2)}%`}></i>
+                <i class="c2__fall--2" style={`left:${((fx(5.8) / 600) * 100).toFixed(2)}%`}></i>
+              </div>
+              <span class="c2__spec-tag" style={`left:${((fx(2.437) / 600) * 100).toFixed(2)}%`}>2.437 GHz</span>
+            </div>
+            <div class="c2__freqs">
+              {axis.map((a) => <span style={`left:${a.left.toFixed(2)}%`}>{a.f}</span>)}
+            </div>
+          </section>
+
+          <footer class="c2__foot">
+            <ul class="c2__devices">
+              {ui.devices.map((name, i) => (
+                <li class="c2__device rv" style={`--at:${linkAt(i)}`}>
+                  <DeviceIcon id={icons[i]} size={10} />
+                  <span>{name}</span>
+                  <i></i>
+                </li>
+              ))}
+            </ul>
+            <span class="c2__status">
+              <span class="c2__status-a"><i></i>{ui.threat}</span>
+              <span class="c2__status-b"><i></i>{ui.leaving}</span>
+              <span class="c2__status-c"><i></i>{ui.status}</span>
+            </span>
+          </footer>
+        </div>
+      </div>
+      <div class="c2s__glass" aria-hidden="true"></div>
+    </div>
+  </div>
+
+  <ol class="c2s__steps" aria-hidden="true">
+    {ui.steps.map((step, i) => (
+      <li class="c2s__step" style={`--s0:${stepAt[i]};--s1:${stepAt[i + 1]}`}>
+        <span class="c2s__step-n">{String(i + 1).padStart(2, '0')}</span>
+        <span>{step}</span>
+        <i></i>
+      </li>
+    ))}
+  </ol>
+  <figcaption class="c2s__caption hud">{caption}</figcaption>
+</figure>
+
+<style>
+  .c2s {
+    --power: clamp(0, (var(--p) - 0.22) * 12, 1);
+    --boot: min(clamp(0, (var(--p) - 0.25) * 30, 1), clamp(0, (0.355 - var(--p)) * 30, 1));
+    --det: clamp(0, (var(--p) - 0.62) * 25, 1);
+    --cam: clamp(0, (var(--p) - 0.7) * 25, 1);
+    --jam: clamp(0, (var(--p) - 0.77) * 25, 1);
+    --away: clamp(0, (var(--p) - 0.86) / 0.1, 1);
+    --safe: clamp(0, (var(--p) - 0.92) * 25, 1);
+    --pink: 214, 60, 232;
+    --amber: 236, 178, 72;
+    --green: 74, 222, 160;
+    margin: 0;
+    width: 100%;
+  }
+
+  .rv {
+    opacity: clamp(0, (var(--p) - var(--at)) * 25, 1);
+  }
+
+  .c2s__device {
+    position: relative;
+  }
+
+  .c2s__laptop {
+    position: relative;
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  .c2s__glow {
+    position: absolute;
+    inset: 6% 10% 40%;
+    background: radial-gradient(closest-side, rgba(var(--rgb-accent), 0.45), transparent);
+    filter: blur(30px);
+    opacity: calc(var(--power) * 0.55);
+  }
+
+  /* Matches the display opening of rugged-laptop.webp. */
+  .c2s__screen {
+    position: absolute;
+    left: 16.06%;
+    top: 11.31%;
+    width: 67.99%;
+    height: 50.76%;
+    overflow: hidden;
+    container-type: size;
+    background: #05080e;
+  }
+
+  .c2s__display {
+    position: absolute;
+    inset: 0;
+    transform: scaleY(max(0.004, var(--power)));
+    opacity: clamp(0, (var(--p) - 0.215) * 40, 1);
+    filter: brightness(calc(2.2 - var(--power) * 1.2));
+    background: #070b13;
+  }
+
+  .c2s__glass {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+      linear-gradient(125deg, rgba(255, 255, 255, 0.06), transparent 38%),
+      repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.015) 0 1px, transparent 1px 3px);
+    box-shadow: inset 0 0 2.5cqw rgba(0, 0, 0, 0.8);
+  }
+
+  .c2s__boot {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2.2cqh;
+    opacity: var(--boot);
+    font-family: var(--font-mono);
+    color: var(--color-accent-soft);
+    text-transform: uppercase;
+  }
+
+  .c2s__boot-mark {
+    font-size: 5cqh;
+    letter-spacing: 0.3em;
+    color: var(--color-fg);
+  }
+
+  .c2s__boot-line {
+    font-size: 2.8cqh;
+    letter-spacing: 0.14em;
+  }
+
+  .c2s__boot-bar {
+    width: 36cqw;
+    height: 0.8cqh;
+    background: rgba(var(--rgb-fg), 0.1);
+  }
+
+  .c2s__boot-bar i {
+    display: block;
+    height: 100%;
+    width: calc(clamp(0, (var(--p) - 0.255) / 0.09, 1) * 100%);
+    background: var(--color-accent);
+  }
+
+  /* Story steps under the laptop */
+  .c2s__steps {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.5rem;
+    margin: 0.8rem 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .c2s__step {
+    --on: min(clamp(0, (var(--p) - var(--s0)) * 25, 1), clamp(0, (var(--s1) - var(--p)) * 25, 1));
+    --done: clamp(0, (var(--p) - var(--s0)) * 25, 1);
+    position: relative;
+    display: grid;
+    gap: 0.2rem;
+    padding-top: 0.55rem;
+    font-size: 0.88rem;
+    line-height: 1.3;
+    color: rgba(var(--rgb-fg), calc(0.62 + var(--on) * 0.38));
+  }
+
+  .c2s__step-n {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    color: rgba(var(--rgb-accent), calc(0.6 + var(--done) * 0.4));
+  }
+
+  .c2s__step i {
+    position: absolute;
+    inset: 0 0 auto;
+    height: 2px;
+    background: rgba(var(--rgb-fg), 0.18);
+  }
+
+  .c2s__step i::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--grad-brand, var(--color-accent));
+    transform: scaleX(var(--done));
+    transform-origin: left;
+  }
+
+  .c2s__caption {
+    margin-top: 0.6rem;
+    text-align: right;
+    color: rgba(var(--rgb-fg), 0.55);
+  }
+
+  /* Dashboard */
+  .c2 {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr) auto auto;
+    font-size: 1.6cqw;
+    line-height: 1.3;
+    color: var(--color-fg);
+    opacity: clamp(0, (var(--p) - 0.34) * 20, 1);
+  }
+
+  .c2 .on {
+    opacity: var(--det);
+  }
+
+  .c2 .off {
+    opacity: calc(1 - var(--det));
+  }
+
+  .c2__bar {
+    display: flex;
+    align-items: center;
+    gap: 1em;
+    padding: 0.5em 0.9em;
+    border-bottom: 1px solid rgba(var(--rgb-fg), 0.1);
+    background: #0a101b;
+    font-family: var(--font-mono);
+    font-size: 0.85em;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: rgba(var(--rgb-fg), 0.6);
+    white-space: nowrap;
+  }
+
+  .c2__brand {
+    color: var(--color-fg);
+    letter-spacing: 0.16em;
+  }
+
+  .c2__site {
+    color: rgba(var(--rgb-fg), 0.75);
+  }
+
+  .c2__tabs {
+    display: flex;
+    gap: 0.3em;
+    margin-left: 0.6em;
+  }
+
+  .c2__tab {
+    padding: 0.15em 0.55em;
+    border: 1px solid transparent;
+  }
+
+  .c2__tab.is-on {
+    border-color: rgba(var(--rgb-accent), 0.55);
+    color: var(--color-accent-soft);
+  }
+
+  .c2__mqtt,
+  .c2__live {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4em;
+  }
+
+  .c2__mqtt {
+    margin-left: auto;
+    color: rgb(var(--green));
+  }
+
+  .c2__clock {
+    color: var(--color-fg);
+  }
+
+  .c2__live {
+    color: var(--color-accent-soft);
+  }
+
+  .c2__mqtt i,
+  .c2__live i,
+  .c2__status i,
+  .c2__device i {
+    width: 0.5em;
+    height: 0.5em;
+    border-radius: 999px;
+    background: currentColor;
+  }
+
+  .c2__live i {
+    animation: c2-blink 1.4s steps(2, jump-none) infinite;
+  }
+
+  .c2__body {
+    display: grid;
+    grid-template-columns: 25% minmax(0, 1fr) 27%;
+    min-height: 0;
+  }
+
+  .c2__col {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6em;
+    min-height: 0;
+    padding: 0.6em 0.7em;
+    background: #090e18;
+  }
+
+  .c2__col--left {
+    border-right: 1px solid rgba(var(--rgb-fg), 0.1);
+  }
+
+  .c2__col--right {
+    border-left: 1px solid rgba(var(--rgb-fg), 0.1);
+  }
+
+  .c2__label {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 0 0 0.35em;
+    font-family: var(--font-mono);
+    font-size: 0.78em;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgba(var(--rgb-fg), 0.5);
+  }
+
+  .c2__count {
+    display: inline-grid;
+    min-width: 1.5em;
+    padding: 0 0.3em;
+    border-radius: 2px;
+    background: rgba(var(--pink), calc(var(--det) * 0.9));
+    color: var(--color-fg);
+    font-weight: 400;
+    text-align: center;
+  }
+
+  .c2__count span {
+    grid-area: 1 / 1;
+  }
+
+  /* Detection card */
+  .c2__empty {
+    padding: 1em 0.5em;
+    border: 1px dashed rgba(var(--rgb-fg), 0.15);
+    font-size: 0.85em;
+    text-align: center;
+    color: rgba(var(--rgb-fg), 0.4);
+    opacity: calc(1 - var(--det));
+  }
+
+  .c2__stack {
+    display: grid;
+    align-items: start;
+  }
+
+  .c2__stack > * {
+    grid-area: 1 / 1;
+  }
+
+  .c2__card {
+    position: relative;
+    display: grid;
+    gap: 0.35em;
+    padding: 0.55em;
+    border: 1px solid rgba(var(--pink), 0.6);
+    border-radius: 3px;
+    background: #0d1320;
+    opacity: var(--det);
+    transform: translateY(calc((1 - var(--det)) * 0.6em));
+  }
+
+  .c2__badge {
+    display: inline-block;
+    padding: 0.1em 0.45em;
+    border-radius: 2px;
+    background: rgba(var(--pink), 0.18);
+    font-size: 0.78em;
+    color: rgb(var(--pink));
+  }
+
+  .c2__model {
+    margin: 0;
+    font-size: 1.05em;
+  }
+
+  .c2__id {
+    margin: -0.25em 0 0;
+    font-family: var(--font-mono);
+    font-size: 0.75em;
+    color: rgba(var(--rgb-fg), 0.5);
+  }
+
+  .c2__chips {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.25em;
+    margin: 0;
+  }
+
+  .c2__chip {
+    --c: var(--green);
+    display: flex;
+    justify-content: space-between;
+    gap: 0.3em;
+    padding: 0.12em 0.35em;
+    border-radius: 2px;
+    background: rgba(var(--c), 0.1);
+    font-size: 0.74em;
+  }
+
+  .c2__chip--y {
+    --c: var(--amber);
+  }
+
+  .c2__chip--i {
+    --c: var(--rgb-accent);
+  }
+
+  .c2__chip--wide {
+    grid-column: span 2;
+  }
+
+  .c2__chip dt {
+    color: rgba(var(--rgb-fg), 0.5);
+  }
+
+  .c2__chip dd {
+    margin: 0;
+    font-family: var(--font-mono);
+    color: rgb(var(--c));
+    white-space: nowrap;
+  }
+
+  .c2__chip--i dd {
+    color: var(--color-accent-soft);
+  }
+
+  .c2__actions {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.25em;
+    margin-top: 0.1em;
+  }
+
+  .c2__action {
+    padding: 0.2em 0;
+    border: 1px solid rgba(var(--rgb-fg), 0.15);
+    border-radius: 2px;
+    font-size: 0.72em;
+    text-align: center;
+    color: rgba(var(--rgb-fg), 0.7);
+  }
+
+  .c2__action--cam {
+    border-color: rgba(var(--rgb-accent), calc(0.15 + var(--cam) * 0.7));
+    background: rgba(var(--rgb-accent), calc(var(--cam) * 0.3));
+    color: rgba(var(--rgb-fg), calc(0.7 + var(--cam) * 0.3));
+  }
+
+  .c2__action--jam {
+    border-color: rgba(var(--pink), calc(0.15 + var(--jam) * 0.7));
+    background: rgba(var(--pink), calc(var(--jam) * 0.3));
+    color: rgba(var(--rgb-fg), calc(0.7 + var(--jam) * 0.3));
+  }
+
+  /* Spectrum strip, full width like the C2 bottom drawer */
+  .c2__spec {
+    padding: 0.4em 0.9em 0.3em;
+    border-top: 1px solid rgba(var(--rgb-fg), 0.1);
+    background: #080c15;
+  }
+
+  .c2__spec .c2__label {
+    margin-bottom: 0.25em;
+  }
+
+  .c2__spec-range {
+    color: rgba(var(--rgb-fg), 0.35);
+  }
+
+  .c2__spec-plot {
+    position: relative;
+    border: 1px solid rgba(var(--rgb-fg), 0.08);
+  }
+
+  .c2__spec-plot svg {
+    display: block;
+    width: 100%;
+    height: 3.6em;
+  }
+
+  .c2__spec-grid {
+    stroke: rgba(var(--rgb-fg), 0.06);
+    vector-effect: non-scaling-stroke;
+  }
+
+  .c2__spec-jam {
+    fill: rgba(var(--pink), calc(var(--jam) * 0.22));
+  }
+
+  .c2__noise {
+    fill: none;
+    stroke: rgba(var(--rgb-accent), 0.7);
+    stroke-width: 0.8;
+    vector-effect: non-scaling-stroke;
+  }
+
+  .c2__peak {
+    fill: rgba(var(--pink), 0.25);
+    stroke: rgb(var(--pink));
+    stroke-width: 1;
+    vector-effect: non-scaling-stroke;
+    opacity: calc(var(--det) * (1 - var(--away) * 0.8));
+  }
+
+  .c2__peak--2 {
+    opacity: calc(var(--det) * 0.7 * (1 - var(--away) * 0.8));
+  }
+
+  .c2__peak--3 {
+    opacity: calc(var(--jam) * 0.6);
+  }
+
+  /* Waterfall: signal history scrolling down under the trace. */
+  .c2__fall {
+    position: relative;
+    height: 1.6em;
+    overflow: hidden;
+    border-top: 1px solid rgba(var(--rgb-fg), 0.08);
+    background:
+      repeating-linear-gradient(90deg, rgba(var(--rgb-accent), 0.05) 0 2px, transparent 2px 5px),
+      repeating-linear-gradient(0deg, rgba(var(--rgb-accent), 0.1) 0 1px, rgba(10, 16, 34, 0.9) 1px 3px);
+    animation: c2-fall 1.2s linear infinite;
+  }
+
+  .c2__fall i {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 1.6%;
+    transform: translateX(-50%);
+    background: repeating-linear-gradient(0deg, rgba(var(--pink), 0.9) 0 2px, rgba(var(--pink), 0.35) 2px 4px);
+    filter: blur(0.5px);
+    opacity: calc(var(--det) * (1 - var(--away) * 0.8));
+  }
+
+  .c2__fall i.c2__fall--2 {
+    width: 1.1%;
+    opacity: calc(var(--det) * 0.6 * (1 - var(--away) * 0.8));
+  }
+
+  .c2__spec-tag {
+    position: absolute;
+    top: 0.2em;
+    transform: translateX(0.6em);
+    padding: 0 0.3em;
+    background: rgba(var(--pink), 0.2);
+    font-family: var(--font-mono);
+    font-size: 0.66em;
+    color: rgb(var(--pink));
+    opacity: var(--det);
+  }
+
+  .c2__freqs {
+    position: relative;
+    height: 1.1em;
+    font-family: var(--font-mono);
+    font-size: 0.62em;
+    color: rgba(var(--rgb-fg), 0.4);
+  }
+
+  .c2__freqs span {
+    position: absolute;
+    top: 0.15em;
+    transform: translateX(-50%);
+  }
+
+  .c2__freqs span:first-child {
+    transform: none;
+  }
+
+  .c2__freqs span:last-child {
+    transform: translateX(-80%);
+  }
+
+  /* Map */
+  .c2__map {
+    position: relative;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .c2__map svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  .c2__grid {
+    fill: none;
+    stroke: rgba(255, 255, 255, 0.04);
+  }
+
+  .c2__contour {
+    fill: none;
+    stroke: rgba(var(--rgb-fg), 0.07);
+  }
+
+  .c2__road {
+    fill: none;
+    stroke: rgba(var(--rgb-fg), 0.12);
+    stroke-width: 2;
+  }
+
+  .c2__runway {
+    fill: rgba(var(--rgb-fg), 0.1);
+    stroke: rgba(var(--rgb-fg), 0.2);
+  }
+
+  .c2__runway-line {
+    stroke: rgba(var(--rgb-fg), 0.35);
+    stroke-dasharray: 5 4;
+  }
+
+  .c2__taxi {
+    fill: none;
+    stroke: rgba(var(--rgb-fg), 0.14);
+    stroke-width: 3;
+  }
+
+  .c2__ring {
+    fill: none;
+    stroke: rgba(var(--rgb-fg), 0.1);
+    stroke-dasharray: 2 4;
+  }
+
+  .c2__ring-label {
+    font-family: var(--font-mono);
+    font-size: 7px;
+    fill: rgba(var(--rgb-fg), 0.4);
+  }
+
+  .c2__sweep {
+    transform-origin: 190px 140px;
+    animation: c2-spin 4s linear infinite;
+    opacity: clamp(0, (var(--p) - 0.41) * 20, 1);
+  }
+
+  .c2__cover {
+    fill: rgba(var(--rgb-accent), 0.06);
+    stroke: rgba(var(--rgb-accent), 0.25);
+  }
+
+  .c2__dome {
+    fill: rgba(var(--rgb-accent), calc(clamp(0, (var(--p) - 0.52) / 0.06, 1) * 0.05));
+    stroke: var(--color-accent-soft);
+    stroke-width: 1.3;
+    stroke-dasharray: 1;
+    stroke-dashoffset: calc(1 - clamp(0, (var(--p) - 0.52) / 0.06, 1));
+  }
+
+  .c2__fov {
+    fill: rgba(var(--amber), 0.12);
+    stroke: rgba(var(--amber), 0.6);
+    stroke-width: 0.8;
+  }
+
+  .c2__jam {
+    fill: rgba(var(--pink), 0.16);
+    stroke: rgba(var(--pink), 0.65);
+    stroke-dasharray: 3 3;
+  }
+
+  .c2__marker {
+    fill: var(--color-accent-soft);
+  }
+
+  .c2__marker-ring {
+    fill: none;
+    stroke: rgba(var(--rgb-accent), 0.45);
+  }
+
+  .c2__trail {
+    fill: none;
+    stroke: rgba(var(--pink), 0.7);
+    stroke-dasharray: 1;
+    stroke-dashoffset: calc(1 - clamp(0, (var(--p) - 0.62) / 0.15, 1));
+  }
+
+  .c2__pilot rect {
+    fill: none;
+    stroke: rgb(var(--amber));
+  }
+
+  .c2__pilot text {
+    font-family: var(--font-mono);
+    font-size: 7px;
+    fill: rgb(var(--amber));
+  }
+
+  .c2__pilot-link {
+    fill: none;
+    stroke: rgba(var(--amber), 0.5);
+    stroke-dasharray: 2 3;
+  }
+
+  .c2__drone {
+    --a: clamp(0, (var(--p) - 0.62) / 0.15, 1);
+    opacity: var(--det);
+    transform: translate(
+      calc((360px - 75px * var(--a)) + 85px * var(--away)),
+      calc((32px + 43px * var(--a)) - 55px * var(--away))
+    );
+  }
+
+  .c2__threat path {
+    fill: rgba(var(--pink), 0.3);
+    stroke: rgb(var(--pink));
+    stroke-width: 1.4;
+  }
+
+  .c2__threat-ring {
+    fill: none;
+    stroke: rgba(var(--pink), 0.6);
+    animation: c2-blink 1.4s steps(2, jump-none) infinite;
+  }
+
+  .c2__track-id {
+    font-family: var(--font-mono);
+    font-size: 7px;
+    fill: rgb(var(--pink));
+  }
+
+  .c2__north path {
+    fill: rgba(var(--rgb-fg), 0.6);
+  }
+
+  .c2__north text {
+    font-family: var(--font-mono);
+    font-size: 7px;
+    fill: rgba(var(--rgb-fg), 0.6);
+    text-anchor: middle;
+  }
+
+  .c2__scale {
+    stroke: rgba(var(--rgb-fg), 0.5);
+    stroke-width: 1.5;
+  }
+
+  .c2__log {
+    position: absolute;
+    left: 0.6em;
+    top: 0.6em;
+    display: grid;
+    gap: 0.15em;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font-family: var(--font-mono);
+    font-size: 0.7em;
+    color: rgba(var(--rgb-fg), 0.75);
+  }
+
+  .c2__log li {
+    padding: 0.1em 0.4em;
+    background: rgba(7, 11, 19, 0.75);
+  }
+
+  .c2__log time {
+    margin-right: 0.6em;
+    color: rgba(var(--rgb-fg), 0.4);
+  }
+
+  .c2__tools {
+    position: absolute;
+    right: 0.5em;
+    top: 0.5em;
+    display: grid;
+    gap: 0.25em;
+    font-family: var(--font-mono);
+    font-size: 0.72em;
+  }
+
+  .c2__tools span {
+    display: grid;
+    place-items: center;
+    width: 1.9em;
+    height: 1.9em;
+    border: 1px solid rgba(var(--rgb-fg), 0.15);
+    background: rgba(7, 11, 19, 0.8);
+    color: rgba(var(--rgb-fg), 0.7);
+  }
+
+  /* Camera */
+  .c2__feed {
+    position: relative;
+    aspect-ratio: 5 / 3;
+    overflow: hidden;
+    border: 1px solid rgba(var(--rgb-fg), 0.12);
+    filter: grayscale(0.6);
+  }
+
+  .c2__feed svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  .c2__hills {
+    fill: #11161f;
+  }
+
+  .c2__cam-drone {
+    opacity: calc(var(--cam) + var(--det) * 0.35 * (1 - var(--cam)));
+    transform: translate(calc(108px - 28px * var(--cam) + 70px * var(--away)), calc(30px + 18px * var(--cam) - 30px * var(--away)));
+  }
+
+  .c2__quad {
+    stroke: #e8ecf5;
+    stroke-width: 1.2;
+  }
+
+  .c2__rotor {
+    fill: none;
+    stroke: rgba(232, 236, 245, 0.7);
+    stroke-width: 0.8;
+  }
+
+  .c2__body-q {
+    fill: #e8ecf5;
+  }
+
+  .c2__lock {
+    fill: none;
+    stroke: rgb(var(--amber));
+    stroke-width: 1;
+    opacity: var(--cam);
+  }
+
+  .c2__cross {
+    stroke: rgba(255, 255, 255, 0.35);
+    stroke-width: 0.6;
+  }
+
+  .c2__feed-tag,
+  .c2__feed-read {
+    position: absolute;
+    font-family: var(--font-mono);
+    font-size: 0.66em;
+    text-transform: uppercase;
+  }
+
+  .c2__feed-tag--rec {
+    top: 0.4em;
+    left: 0.5em;
+    color: rgb(255, 90, 90);
+  }
+
+  .c2__feed-tag--lock {
+    top: 0.4em;
+    right: 0.5em;
+    padding: 0 0.3em;
+    background: rgba(var(--amber), 0.85);
+    color: #111;
+    opacity: calc(var(--cam) * (1 - var(--away)));
+  }
+
+  .c2__feed-read {
+    left: 0.5em;
+    bottom: 0.35em;
+    color: rgba(255, 255, 255, 0.75);
+  }
+
+  /* Jamming bands */
+  .c2__bands {
+    display: grid;
+    gap: 0.3em;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .c2__band {
+    display: grid;
+    grid-template-columns: 4.6em minmax(0, 1fr) 4.2em;
+    align-items: center;
+    gap: 0.4em;
+    font-family: var(--font-mono);
+    font-size: 0.72em;
+  }
+
+  .c2__band-f {
+    color: rgba(var(--rgb-fg), 0.75);
+  }
+
+  .c2__band-bar {
+    height: 0.4em;
+    background: rgba(var(--rgb-fg), 0.1);
+  }
+
+  .c2__band-bar i {
+    display: block;
+    height: 100%;
+    width: 0;
+    background: rgb(var(--pink));
+  }
+
+  .c2__band--on .c2__band-bar i {
+    width: calc(var(--jam) * 82%);
+  }
+
+  .c2__band-state {
+    display: grid;
+    text-align: right;
+    text-transform: uppercase;
+    color: rgba(var(--rgb-fg), 0.45);
+  }
+
+  .c2__band-state span {
+    grid-area: 1 / 1;
+  }
+
+  .c2__band--on .c2__band-state .off {
+    opacity: calc(1 - var(--jam));
+  }
+
+  .c2__band--on .c2__band-state .on {
+    opacity: var(--jam);
+    color: rgb(var(--pink));
+  }
+
+  /* Footer: device health and site status */
+  .c2__foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1em;
+    padding: 0.45em 0.9em;
+    border-top: 1px solid rgba(var(--rgb-fg), 0.1);
+    background: #0a101b;
+    font-size: 0.78em;
+  }
+
+  .c2__devices {
+    display: flex;
+    gap: 1.1em;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .c2__device {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4em;
+    white-space: nowrap;
+    color: rgba(var(--rgb-fg), 0.8);
+  }
+
+  .c2__device :global(svg) {
+    width: 1em;
+    height: 1em;
+    color: var(--color-accent-soft);
+  }
+
+  .c2__device i {
+    color: rgb(var(--green));
+  }
+
+  .c2__status {
+    display: grid;
+    font-family: var(--font-mono);
+    font-size: 0.92em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .c2__status > span {
+    grid-area: 1 / 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.45em;
+  }
+
+  .c2__status-a {
+    color: rgb(var(--pink));
+    opacity: calc(var(--det) * (1 - clamp(0, (var(--p) - 0.86) * 25, 1)));
+  }
+
+  .c2__status-b {
+    color: rgb(var(--amber));
+    opacity: calc(clamp(0, (var(--p) - 0.86) * 25, 1) * (1 - var(--safe)));
+  }
+
+  .c2__status-c {
+    color: rgb(var(--green));
+    opacity: max(var(--safe), clamp(0, (var(--p) - 0.55) * 25, 1) * (1 - var(--det)));
+  }
+
+  @keyframes c2-blink {
+    0% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0.25;
+    }
+  }
+
+  @keyframes c2-fall {
+    to {
+      background-position: 0 0, 0 3px;
+    }
+  }
+
+  @keyframes c2-spin {
+    to {
+      transform: rotate(-360deg);
+    }
+  }
+</style>

@@ -1,0 +1,312 @@
+---
+import type { Dictionary } from '../../i18n/types';
+
+interface Props {
+  dict: Dictionary;
+}
+
+const { dict } = Astro.props;
+const t = dict.story.prologue;
+const [lead, ...rest] = t.titleLines;
+const devices = dict.story.devices;
+const total = String(devices.length).padStart(2, '0');
+---
+
+<section
+  class="chapter prologue"
+  data-chapter
+  data-static-p="0"
+  data-pin
+  data-length="0.9"
+  data-rail={dict.story.rail[0]}
+  data-start="top top"
+  data-end="bottom top"
+  aria-labelledby="prologue-title"
+>
+  <div class="container-axion chapter__stage prologue__stage">
+    <div class="prologue__device" data-hero-device aria-hidden="true">
+      <picture class="prologue__device-still">
+        <source srcset="/media/story/device-still.avif" type="image/avif" />
+        <img src="/media/story/device-still.webp" alt="" width="900" height="900" fetchpriority="low" />
+      </picture>
+
+      <div class="prologue__label hud">
+        <span class="prologue__label-index" data-device-index>01 / {total}</span>
+        <span class="prologue__label-names">
+          {
+            devices.map((d, i) => (
+              <span class:list={['prologue__label-name', { 'is-on': i === 0 }]} data-device-name={i}>
+                <span class="prologue__label-short">{d.short}</span>
+                <span class="prologue__label-readout">{d.readout}</span>
+              </span>
+            ))
+          }
+        </span>
+        <span class="prologue__label-bar" data-device-bar></span>
+      </div>
+    </div>
+
+    <div class="prologue__content">
+      <p class="tag" data-decode="0" data-decode-duration="0.6">
+        <span>Axionlab</span>
+        <span>C2 / C4</span>
+      </p>
+
+      <h1 id="prologue-title" class="headline prologue__title" data-decode="0.15" data-decode-duration="1.2">
+        {lead} <span class="grad-text">{rest.join(' ')}</span>
+      </h1>
+
+      <div class="prologue__foot" data-decode="0.5" data-decode-duration="1.1">
+        <p class="lede prologue__lede">{t.subtitle}</p>
+      </div>
+    </div>
+
+    <a href="#problem" class="prologue__cue hud" aria-label={t.scrollCue}>
+      <span class="prologue__cue-line" aria-hidden="true"></span>
+      <span>{t.scrollCue}</span>
+    </a>
+
+    <p class="prologue__coords hud">
+      <span aria-hidden="true" data-decode="0.9" data-decode-duration="0.7">41.3111° N · 69.2797° E</span>
+      <span data-decode="1" data-decode-duration="0.7">{t.renderNote}</span>
+    </p>
+  </div>
+</section>
+
+<style>
+  .prologue {
+    border-top: 0;
+  }
+
+  .prologue__stage {
+    align-items: flex-end;
+    padding-bottom: clamp(5.5rem, 12vh, 8rem);
+  }
+
+  .prologue__device {
+    position: absolute;
+    top: 4.5rem;
+    left: 50%;
+    width: min(92vw, 30rem);
+    height: min(30vh, 18rem);
+    transform: translateX(-50%) translateY(calc(var(--p) * -60px));
+    opacity: calc(1 - var(--p) * 1.6);
+  }
+
+  @media (min-width: 1000px) {
+    .prologue__device {
+      top: 50%;
+      left: auto;
+      right: clamp(0rem, 2vw, 2rem);
+      width: min(46vw, 820px, 92vh);
+      height: min(46vw, 820px, 78vh);
+      transform: translateY(calc(-54% - var(--p) * 80px));
+    }
+
+    .prologue__content {
+      max-width: 52%;
+    }
+  }
+
+  .prologue__device-still {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 1.2s ease;
+  }
+
+  .prologue__device-still img {
+    width: auto;
+    height: 100%;
+    max-width: 100%;
+    object-fit: contain;
+  }
+
+  /* The live scene grows its own devices, so the still is only for tiers that keep a static frame. */
+  :global(html.js .webgl-stage:not([data-tier='low']):not([data-tier='static'])) ~ :global(.story) .prologue__device-still,
+  :global(.webgl-stage.is-live) ~ :global(.story) .prologue__device-still {
+    opacity: 0;
+  }
+
+  .prologue__label {
+    position: absolute;
+    left: 50%;
+    bottom: 0;
+    display: grid;
+    grid-template-columns: auto auto;
+    gap: 0.35rem 1rem;
+    align-items: baseline;
+    padding: 0.6rem 0.95rem 0.55rem;
+    border: 1px solid rgba(var(--rgb-fg), 0.14);
+    border-radius: 0.5rem;
+    background: rgba(var(--rgb-bg), 0.78);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    font-size: 0.8rem;
+    transform: translate(-50%, 45%);
+    white-space: nowrap;
+  }
+
+  @media (max-width: 999px) {
+    .prologue__label {
+      top: 0;
+      bottom: auto;
+    }
+  }
+
+  .prologue__label {
+    transition: opacity 0.8s ease;
+  }
+
+  :global(html.js .webgl-stage:not([data-tier='low']):not([data-tier='static'])) ~ :global(.story) .prologue__label:not(.is-shown) {
+    opacity: 0;
+  }
+
+  .prologue__label-index {
+    font-variant-numeric: tabular-nums;
+    color: rgba(var(--rgb-fg), 0.7);
+  }
+
+  .prologue__label-names {
+    display: grid;
+  }
+
+  .prologue__label-name {
+    grid-area: 1 / 1;
+    display: flex;
+    gap: 0.75rem;
+    opacity: 0;
+    transform: translateY(6px);
+    transition:
+      opacity 0.5s ease,
+      transform 0.5s var(--ease-out-expo);
+  }
+
+  .prologue__label-name.is-on {
+    opacity: 1;
+    transform: none;
+  }
+
+  .prologue__label-short {
+    color: var(--color-fg);
+  }
+
+  .prologue__label-readout {
+    color: #7d9cff;
+  }
+
+  .prologue__label-bar {
+    grid-column: 1 / -1;
+    position: relative;
+    height: 1px;
+    overflow: hidden;
+    background: var(--color-border-strong);
+  }
+
+  .prologue__label-bar::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--grad-brand-text);
+    transform-origin: left;
+    transform: scaleX(var(--bar, 0));
+  }
+
+  .prologue__content {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    width: 100%;
+    opacity: calc(1 - var(--p) * 1.6);
+    transform: translateY(calc(var(--p) * -80px));
+  }
+
+  .prologue__content > .tag {
+    align-self: flex-start;
+  }
+
+  .prologue__title {
+    max-width: 14ch;
+    font-size: clamp(3rem, 6.6vw, 7.5rem);
+    font-weight: 360;
+    letter-spacing: -0.055em;
+    line-height: 0.92;
+  }
+
+  .prologue__foot {
+    display: grid;
+    gap: 1.5rem;
+    padding-top: 1.75rem;
+    border-top: 1px solid var(--color-border);
+  }
+
+  .prologue__lede {
+    color: var(--color-fg);
+    opacity: 0.88;
+    text-shadow: 0 1px 12px rgba(var(--rgb-bg), 0.9);
+  }
+
+  .prologue__cue {
+    position: absolute;
+    right: clamp(1.25rem, 3.2vw, 2.75rem);
+    bottom: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+    color: rgba(var(--rgb-fg), 0.8);
+    opacity: calc(1 - var(--p) * 4);
+  }
+
+  .prologue__coords {
+    position: absolute;
+    left: clamp(1.25rem, 3.2vw, 2.75rem);
+    bottom: 2rem;
+    display: flex;
+    gap: 1.5rem;
+    margin: 0;
+    font-variant-numeric: tabular-nums;
+    color: rgba(var(--rgb-fg), 0.8);
+    opacity: calc(1 - var(--p) * 4);
+  }
+
+  @media (max-width: 899px) {
+    .prologue__coords > :first-child,
+    .prologue__cue-line {
+      display: none;
+    }
+  }
+
+  @media (max-width: 599px) {
+    .prologue__cue {
+      display: none;
+    }
+  }
+
+  .prologue__cue-line {
+    position: relative;
+    width: 3rem;
+    height: 1px;
+    overflow: hidden;
+    background: var(--color-border-strong);
+  }
+
+  .prologue__cue-line::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    width: 40%;
+    background: var(--color-fg);
+    animation: cue 2.4s var(--ease-in-out-quint) infinite;
+  }
+
+  @keyframes cue {
+    0% {
+      transform: translateX(-100%);
+    }
+    100% {
+      transform: translateX(250%);
+    }
+  }
+</style>

@@ -1,0 +1,32 @@
+---
+interface Props {
+  id?: string;
+  index: number;
+  label: string;
+  title: string;
+  body?: string;
+  as?: 'h1' | 'h2';
+  size?: 'lg' | 'md';
+}
+
+const { id, index, label, title, body, as: Tag = 'h2', size = 'md' } = Astro.props;
+---
+
+<div class="chapter-intro">
+  <p class="kicker">
+    <span class="kicker__idx">{String(index).padStart(2, '0')}</span>
+    <span class="kicker__rule" aria-hidden="true"></span>
+    <span>{label}</span>
+  </p>
+  <Tag id={id} class:list={['headline', { 'headline--md': size === 'md' }]} data-split>{title}</Tag>
+  {body && <p class="lede">{body}</p>}
+  <slot />
+</div>
+
+<style>
+  .chapter-intro {
+    display: flex;
+    flex-direction: column;
+    gap: 1.75rem;
+  }
+</style>

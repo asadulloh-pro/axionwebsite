@@ -61,10 +61,10 @@ export default function ContactForm({
   if (status === 'success') {
     return (
       <div
-        className="rounded-2xl border border-accent/30 bg-accent-dim p-8 text-center"
+        className="border border-border-strong p-8 text-center"
         role="status"
       >
-        <p className="text-accent font-medium">{successMessage}</p>
+        <p className="text-fg">{successMessage}</p>
         <button
           type="button"
           className="mt-4 text-sm text-fg-muted underline hover:text-fg"
@@ -92,8 +92,8 @@ export default function ContactForm({
             placeholder: field.placeholder,
             'aria-invalid': hasError || undefined,
             onChange,
-            className: `w-full rounded-xl border bg-bg-elevated px-4 py-3 text-sm outline-none transition placeholder:text-fg-dim focus:border-accent ${
-              hasError ? 'border-red-500/60' : 'border-border'
+            className: `w-full rounded-none border-0 border-b bg-transparent px-0 py-3 text-base outline-none transition-colors placeholder:text-fg-dim focus:border-fg ${
+              hasError ? 'border-red-500/60' : 'border-border-strong'
             }`,
           };
 
@@ -102,7 +102,7 @@ export default function ContactForm({
               key={field.name}
               className={field.type === 'textarea' ? 'sm:col-span-2' : undefined}
             >
-              <label htmlFor={field.name} className="mb-2 block text-sm text-fg-muted">
+              <label htmlFor={field.name} className="label-mono mb-2 block !text-fg-muted">
                 {field.label}
                 {field.required && <span className="text-accent"> *</span>}
               </label>
@@ -125,7 +125,7 @@ export default function ContactForm({
       <button
         type="submit"
         disabled={status === 'submitting'}
-        className="inline-flex items-center justify-center rounded-full bg-accent px-8 py-3 text-sm font-medium text-white transition hover:brightness-110 disabled:opacity-60"
+        className="btn btn--primary disabled:opacity-60"
       >
         {status === 'submitting' ? submittingLabel : submitLabel}
       </button>

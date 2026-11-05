@@ -1,7 +1,7 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import Partners from './sections/Partners.astro';
-import CTA from './sections/CTA.astro';
+import PageHero from './PageHero.astro';
+import ClosingCTA from './ClosingCTA.astro';
 import { getDictionary, type Locale } from '../i18n';
 import { localizePath } from '../lib/paths';
 
@@ -40,49 +40,128 @@ const breadcrumb = {
   canonicalPath={localizePath('about', locale)}
   jsonLd={breadcrumb}
 >
-  <section class="pt-28 md:pt-32 section-pad border-b border-border">
-    <div class="container-axion max-w-4xl">
-      <p class="label-mono mb-4 reveal">{page.label}</p>
-      <h1 class="reveal text-[clamp(2rem,5vw,3.5rem)] font-semibold tracking-tight mb-6">
-        {page.title}
-      </h1>
-      <p class="reveal text-lg text-fg-muted leading-relaxed">
-        {dict.company.body}
+  <PageHero label={page.label} title={page.title} subtitle={dict.company.body} />
+
+  <section class="section-pad about-mission">
+    <div class="container-axion about-split">
+      <p class="kicker reveal">
+        <span class="kicker__idx">01</span>
+        <span class="kicker__rule" aria-hidden="true"></span>
+        <span>{page.missionTitle}</span>
       </p>
+      <p class="about-mission__body reveal" style="transition-delay: 80ms">{page.missionBody}</p>
     </div>
   </section>
 
-  <section class="section-pad border-b border-border">
-    <div class="container-axion grid gap-10 lg:grid-cols-12">
-      <div class="lg:col-span-4 reveal">
-        <h2 class="text-2xl md:text-3xl font-semibold">{page.missionTitle}</h2>
-      </div>
-      <div class="lg:col-span-8 reveal">
-        <p class="text-base md:text-lg text-fg-muted leading-relaxed">{page.missionBody}</p>
-      </div>
-    </div>
-  </section>
-
-  <section class="section-pad border-b border-border">
+  <section class="section-pad about-approach">
     <div class="container-axion">
-      <h2 class="reveal text-2xl md:text-3xl font-semibold mb-10">{page.approachTitle}</h2>
-      <div class="grid gap-4 sm:grid-cols-2">
+      <p class="kicker reveal">
+        <span class="kicker__idx">02</span>
+        <span class="kicker__rule" aria-hidden="true"></span>
+        <span>{page.approachTitle}</span>
+      </p>
+      <ol class="row-list about-rows">
         {page.principles.map((principle, i) => (
-          <article
-            class="reveal rounded-2xl border border-border bg-bg-card p-6 md:p-8"
-            style={`transition-delay: ${i * 60}ms`}
-          >
-            <span class="font-mono text-xs text-accent mb-3 block">
-              [{String(i + 1).padStart(2, '0')}]
-            </span>
-            <h3 class="text-lg font-medium mb-2">{principle.title}</h3>
-            <p class="text-sm text-fg-muted leading-relaxed">{principle.body}</p>
+          <li class="row reveal" style={`transition-delay: ${i * 60}ms`}>
+            <span class="row__idx">{String(i + 1).padStart(2, '0')}</span>
+            <h3 class="row__title">{principle.title}</h3>
+            <p class="row__body">{principle.body}</p>
+          </li>
+        ))}
+      </ol>
+    </div>
+  </section>
+
+  <section class="section-pad about-partners">
+    <div class="container-axion">
+      <p class="kicker reveal">
+        <span class="kicker__idx">03</span>
+        <span class="kicker__rule" aria-hidden="true"></span>
+        <span>{dict.story.epilogue.partnersLabel}</span>
+      </p>
+      <h2 class="headline headline--sm about-partners__title reveal">{dict.partners.title}</h2>
+      <div class="about-partners__grid">
+        {dict.partners.items.map((partner, i) => (
+          <article class="panel about-partner reveal" style={`transition-delay: ${i * 80}ms`}>
+            <img src={partner.logo} alt={partner.name} height="32" loading="lazy" class="about-partner__logo" />
+            <h3 class="about-partner__name">{partner.name}</h3>
+            <p class="about-partner__body">{partner.description}</p>
           </article>
         ))}
       </div>
     </div>
   </section>
 
-  <Partners dict={dict} />
-  <CTA dict={dict} locale={locale} />
+  <ClosingCTA dict={dict} locale={locale} />
 </Layout>
+
+<style>
+  .about-mission,
+  .about-approach,
+  .about-partners {
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .about-split {
+    display: grid;
+    gap: 2rem;
+  }
+
+  @media (min-width: 900px) {
+    .about-split {
+      grid-template-columns: minmax(0, 0.4fr) minmax(0, 1fr);
+    }
+  }
+
+  .about-mission__body {
+    font-size: clamp(1.4rem, 2.6vw, 2.1rem);
+    font-weight: 500;
+    line-height: 1.35;
+    letter-spacing: -0.015em;
+    color: var(--color-fg);
+  }
+
+  .about-rows {
+    margin-top: 2.5rem;
+  }
+
+  .about-partners__title {
+    margin-top: 1.5rem;
+    max-width: 28ch;
+  }
+
+  .about-partners__grid {
+    display: grid;
+    gap: 1rem;
+    margin-top: 2.5rem;
+  }
+
+  @media (min-width: 900px) {
+    .about-partners__grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  .about-partner {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding: clamp(1.5rem, 3vw, 2.25rem);
+  }
+
+  .about-partner__logo {
+    height: 2rem;
+    width: auto;
+    align-self: flex-start;
+    filter: grayscale(1) brightness(1.6);
+  }
+
+  .about-partner__name {
+    font-size: 1.2rem;
+  }
+
+  .about-partner__body {
+    color: var(--color-fg-muted);
+    line-height: 1.6;
+  }
+</style>

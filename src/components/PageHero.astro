@@ -1,0 +1,22 @@
+---
+interface Props {
+  label: string;
+  title: string;
+  subtitle?: string;
+}
+
+const { label, title, subtitle } = Astro.props;
+---
+
+<section class="page-hero">
+  <div class="container-axion">
+    <p class="kicker reveal">
+      <span class="kicker__idx">{label.replace(/[\[\]]/g, '')}</span>
+      <span class="kicker__rule" aria-hidden="true"></span>
+      <span>Axionlab</span>
+    </p>
+    <h1 class="headline page-hero__title" data-split="load">{title}</h1>
+    {subtitle && <p class="lede page-hero__lede reveal" style="transition-delay: 160ms">{subtitle}</p>}
+    <slot />
+  </div>
+</section>

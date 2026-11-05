@@ -1,6 +1,6 @@
 import { defaultLocale, type Locale, locales } from '../i18n/types';
 
-const pagePaths = ['', 'about', 'solutions', 'technologies', 'contact'] as const;
+const pagePaths = ['', 'about', 'solutions', 'technologies', 'contact', 'projects/c2-c4', 'projects/interceptor'] as const;
 export type PagePath = (typeof pagePaths)[number];
 
 export function localizePath(path: string, locale: Locale): string {

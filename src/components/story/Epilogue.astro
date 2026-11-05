@@ -1,0 +1,141 @@
+---
+import type { Dictionary, Locale } from '../../i18n/types';
+import { localizePath } from '../../lib/paths';
+
+interface Props {
+  dict: Dictionary;
+  locale: Locale;
+}
+
+const { dict, locale } = Astro.props;
+const t = dict.story.epilogue;
+---
+
+<section class="chapter epilogue" data-chapter data-rail={dict.story.rail[8]} aria-labelledby="epilogue-title">
+  <div class="epilogue__media" aria-hidden="true">
+    <div class="epilogue__glow"></div>
+    <div class="epilogue__veil"></div>
+  </div>
+
+  <div class="container-axion epilogue__inner">
+    <h2 id="epilogue-title" class="headline epilogue__title" data-split>{t.title}</h2>
+    <p class="lede epilogue__body reveal" style="transition-delay: 100ms">{t.body}</p>
+    <div class="epilogue__actions reveal" style="transition-delay: 180ms">
+      <a href={localizePath('contact', locale)} class="btn btn--primary">
+        {t.primary}
+        <span class="btn__arrow" aria-hidden="true">→</span>
+      </a>
+      <a href={localizePath('about', locale)} class="btn btn--ghost">{t.secondary}</a>
+    </div>
+  </div>
+
+  <div class="container-axion epilogue__partners reveal">
+    <span class="hud">{t.partnersLabel}</span>
+    <ul>
+      {dict.partners.items.map((partner) => (
+        <li>
+          <img src={partner.logo} alt={partner.name} height="28" loading="lazy" />
+        </li>
+      ))}
+    </ul>
+  </div>
+</section>
+
+<style>
+  .epilogue {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 100svh;
+  }
+
+  .epilogue__media {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    overflow: hidden;
+  }
+
+  .epilogue__glow {
+    position: absolute;
+    left: 50%;
+    bottom: -30%;
+    width: min(90rem, 140vw);
+    aspect-ratio: 2 / 1;
+    transform: translateX(-50%);
+    background:
+      radial-gradient(ellipse 35% 50% at 25% 55%, rgba(var(--rgb-cyan), 0.32), transparent 70%),
+      radial-gradient(ellipse 40% 55% at 75% 50%, rgba(98, 52, 210, 0.4), transparent 70%),
+      radial-gradient(ellipse 30% 40% at 50% 60%, rgba(var(--rgb-pink), 0.18), transparent 70%);
+    filter: blur(20px);
+  }
+
+  .epilogue__veil {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 60% 50% at 50% 45%, rgba(var(--rgb-bg), 0.55), transparent 80%),
+      linear-gradient(180deg, var(--color-bg) 0%, transparent 30%, transparent 75%, rgba(var(--rgb-bg), 0.85) 100%);
+  }
+
+  .epilogue__inner {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1.75rem;
+    padding-block: clamp(8rem, 18vh, 12rem) 4rem;
+    text-align: center;
+  }
+
+  .epilogue__title {
+    max-width: 16ch;
+    font-size: clamp(2.8rem, 7.5vw, 7rem);
+    font-weight: 340;
+    letter-spacing: -0.05em;
+  }
+
+  .epilogue__body {
+    margin-inline: auto;
+  }
+
+  .epilogue__actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.75rem;
+    margin-top: 0.5rem;
+  }
+
+  .epilogue__partners {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 1.25rem 2.5rem;
+    padding-block: 2rem 3rem;
+  }
+
+  .epilogue__partners ul {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 2.5rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .epilogue__partners img {
+    height: 1.75rem;
+    width: auto;
+    opacity: 0.7;
+    filter: grayscale(1) brightness(1.6);
+    transition: opacity 0.3s ease;
+  }
+
+  .epilogue__partners img:hover {
+    opacity: 1;
+  }
+</style>
