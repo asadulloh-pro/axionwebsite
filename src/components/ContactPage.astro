@@ -77,6 +77,9 @@ const contactLd = {
             referrerpolicy="no-referrer-when-downgrade"
           ></iframe>
         </div>
+        <p class="contact__attrib">
+          <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">© OpenStreetMap</a>
+        </p>
       </div>
 
       <div class="contact__form panel reveal" style="transition-delay: 120ms">
@@ -143,11 +146,28 @@ const contactLd = {
   }
 
   .contact__map iframe {
+    display: block;
     width: 100%;
-    height: 100%;
+    height: calc(100% + 5rem);
+    margin-bottom: -5rem;
     border: 0;
     filter: grayscale(1) invert(0.92) contrast(1.1);
     opacity: 0.85;
+  }
+
+  .contact__attrib {
+    margin: 0.65rem 0 0;
+    font-size: 0.72rem;
+    letter-spacing: 0.02em;
+    color: var(--color-fg-dim);
+  }
+
+  .contact__attrib a {
+    color: inherit;
+  }
+
+  .contact__attrib a:hover {
+    color: var(--color-fg-muted);
   }
 
   .contact__form {

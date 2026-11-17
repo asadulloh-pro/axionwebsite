@@ -115,7 +115,6 @@ export interface Story {
     label: string;
     title: string;
     items: { id: string; title: string; body: string; tags: string[] }[];
-    link: string;
   };
   stack: {
     label: string;

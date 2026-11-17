@@ -3,7 +3,7 @@ import type { Dictionary } from './types';
 const uz: Dictionary = {
   meta: {
     siteName: 'Axionlab',
-    title: "Axionlab: qurilmalar integratsiyasi va C2/C4 dasturiy ta'minoti",
+    title: 'Axionlab: PUA monitoringi va ularga qarshi kurash tizimlari',
     description:
       "Axionlab radarlar, lidarlar, kameralar, jammerlar, dronlar va IoT qurilmalarini yagona operatsion manzaraga birlashtiradi hamda mudofaa, xavfsizlik va muhim infratuzilma uchun C2 va C4 dasturiy ta'minotini yaratadi.",
     ogLocale: 'uz_UZ',
@@ -27,9 +27,9 @@ const uz: Dictionary = {
       { id: 'interceptor', name: 'Ushlab qoluvchi dron', short: 'Interseptor', detail: 'Buyruq bilan uchib, dushman dronlarini ushlab qoladi.', readout: 'TGT LOCK' },
     ],
     prologue: {
-      titleLines: ['Har bir qurilma', "o'z tilida gapiradi."],
+      titleLines: ['Aniqlash va bostirish qurilmalari', 'yagona nazorat tizimida'],
       subtitle:
-        "Radarlar, lidarlar, kameralar, jammerlar va dronlar bir osmonni kuzatadi. Faqat ular bir-birini eshitmaydi. Biz ularni yagona tizim sifatida ishlatamiz.",
+        "Radarlar, kameralar, radio-aniqlagichlar, radio va navigatsion bostirish vositalari. Turli xil qurilmalar bitta interfeysdan birlashtirilgan va boshqariladi.",
       scrollCue: 'Boshlash uchun pastga suring',
       renderNote: 'Illyustrativ vizualizatsiya',
     },
@@ -46,12 +46,12 @@ const uz: Dictionary = {
     interceptor: {
       label: 'Loyihalarimiz',
       title: 'Interseptor dron.',
-      body: "Shahed tipidagi va boshqa dushman dronlarini topadigan, kuzatadigan va yo'q qiladigan sun'iy intellektli interseptor.",
+      body: "Dushman PUAlarini aniqlaydigan, belgilaydigan, kuzatadigan va yo'q qiladigan sun'iy intellektli interseptor.",
       specs: [
         { value: '200 km/soat', label: 'Maksimal tezlik' },
         { value: '5 km', label: 'Masofa' },
-        { value: '0 s', label: 'Uchishga tayyorlik' },
-        { value: '2,5 kg', label: 'Massa' },
+        { value: '5 s', label: 'Uchishga tayyorlik' },
+        { value: '2,5/3 kg', label: 'Massa' },
       ],
       cta: 'Qanday ishlaydi',
       lock: { target: 'Shahed tipidagi dron', tracking: 'Kuzatilmoqda', locked: 'Nishon qamrab olindi', destroyed: "Nishon yo'q qilindi" },
@@ -78,17 +78,17 @@ const uz: Dictionary = {
       label: 'C2 / C4',
       title: 'Aniqlashdan qarorgacha.',
       steps: [
-        { title: 'Aniqlash', body: "Sensorlar obyektni payqaydi va trek avtomatik ravishda yaratiladi.", status: 'Trek yaratildi' },
-        { title: 'Tasniflash', body: "Kompyuter ko'rish va ML modellari bu nima ekanini va qanchalik ishonchli ekanini taklif qiladi.", status: 'Tasniflandi' },
-        { title: 'Tasdiqlash', body: "Operator barcha dalillarni bir joyda ko'radi va qaror qabul qiladi.", status: 'Operator kutilmoqda' },
-        { title: 'Javob', body: "Buyruq kerakli qurilmaga, kameradan jammergacha, yuboriladi va har bir qadam qayd etiladi.", status: 'Javob tayinlandi' },
+        { title: 'Aniqlash', body: "Turli sensorlardan kelgan ma'lumotlar obyekt yoki signalni aniqlash uchun birlashtiriladi.", status: 'Trek yaratildi' },
+        { title: 'Tasniflash', body: "Radio-protokolni ochish va harakat namunalarini ML modeli ishtirokida tahlil qilish har bir obyekt uchun tasnif ishonch darajasini belgilaydi.", status: 'Tasniflandi' },
+        { title: 'Nazorat', body: "Operator obyektlar bo'yicha umumlashtirilgan ma'lumot va parametrlarni oladi.", status: 'Nazoratda' },
+        { title: 'Qaror', body: "Shu tizim interfeysida operator qarshi choralar qo'llaydi va vaziyat rivojini nazorat qiladi.", status: 'Qaror qabul qilindi' },
       ],
       closing: "Tezlik mashinalar zimmasida. Vakolat odamlarda qoladi.",
       confirm: 'Tasdiqlash',
     },
     field: {
       label: 'Muhandislik',
-      title: "Namoyish uchun emas, real sharoit uchun loyihalangan.",
+      title: "Tizim O'zbekiston Respublikasi hududida muvaffaqiyatli joylashtirilgan va vazifalarni bajaradi.",
       cards: [
         { title: 'Real vaqt', body: "Oqimlar kelishi bilan qayta ishlanadi, soniyalar muhim bo'lgan ishlar uchun." },
         { title: 'Barqaror', body: "Beqaror aloqa va zaiflashgan infratuzilmada ham ishlashda davom etadi." },
@@ -113,7 +113,6 @@ const uz: Dictionary = {
           tags: ['Energetika', 'Transport', 'Sanoat va shaharlar'],
         },
       ],
-      link: "Yechimlarni ko'rish",
     },
     stack: {
       label: 'Texnologiya',
@@ -129,9 +128,9 @@ const uz: Dictionary = {
       link: 'Barcha texnologiyalar',
     },
     epilogue: {
-      title: "Qurilmalaringizni olib keling. Manzarani biz beramiz.",
-      body: "Nimalardan va qayerda foydalanayotganingizni ayting. Ularning yagona tizimga qanday qo'shilishini ko'rsatamiz.",
-      primary: 'Suhbatni boshlash',
+      title: "Obyektlaringiz atrofidagi havo hududining nazorati va xavfsizligini ta'minlaymiz.",
+      body: "Talablaringiz va infratuzilmangiz konfiguratsiyasini belgilang, biz esa yechim taklif qilamiz.",
+      primary: "Biz bilan bog'laning",
       secondary: 'Axionlab haqida',
       partnersLabel: 'Hamkorlarimiz',
     },
@@ -399,7 +398,7 @@ const uz: Dictionary = {
       launch: {
         label: 'Uchish',
         title: 'Koordinata keldi. Uchish.',
-        body: "Radar nishon koordinatalarini interseptorga yuboradi. Operator tasdiqlaydi va interseptor o'sha nuqtaga uchadi. Uchishga tayyorlik: 0 s.",
+        body: "Radar nishon koordinatalarini interseptorga yuboradi. Operator tasdiqlaydi va interseptor o'sha nuqtaga uchadi. Uchishga tayyorlik: 5 s.",
       },
       seeker: {
         label: 'AI nishonlash',
@@ -421,8 +420,8 @@ const uz: Dictionary = {
           { value: '5 km', label: 'Masofa' },
           { value: '< 5 daq', label: 'Vazifa vaqti' },
           { value: '< 10 daq', label: 'Joyda yoyish' },
-          { value: '0 s', label: 'Uchishga tayyorlik' },
-          { value: '2,5 kg', label: 'Massa' },
+          { value: '5 s', label: 'Uchishga tayyorlik' },
+          { value: '2,5/3 kg', label: 'Massa' },
           { value: "O'rnatilgan", label: 'Kinetik jangovar qism' },
         ],
       },

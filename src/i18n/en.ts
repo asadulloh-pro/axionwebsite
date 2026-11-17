@@ -3,7 +3,7 @@ import type { Dictionary } from './types';
 const en: Dictionary = {
   meta: {
     siteName: 'Axionlab',
-    title: 'Axionlab: device integration and C2/C4 software',
+    title: 'Axionlab: UAV monitoring and countermeasure systems',
     description:
       'Axionlab connects radars, lidars, cameras, jammers, drones and IoT into one operational picture, with C2 and C4 software for defense, security and critical infrastructure.',
     ogLocale: 'en_US',
@@ -27,9 +27,9 @@ const en: Dictionary = {
       { id: 'interceptor', name: 'Interceptor drone', short: 'Interceptor', detail: 'Launches on command to intercept hostile drones.', readout: 'TGT LOCK' },
     ],
     prologue: {
-      titleLines: ['Every device speaks', 'its own language.'],
+      titleLines: ['Detection and suppression devices', 'in one control system'],
       subtitle:
-        "Radars, lidars, cameras, jammers and drones watch the same sky. They just can't hear each other. We make them work as one.",
+        'Radars, cameras, radio detectors, and radio and navigation suppression systems. Different types of devices, combined and controlled from a single interface.',
       scrollCue: 'Scroll to begin',
       renderNote: 'Illustrative visualization',
     },
@@ -46,12 +46,12 @@ const en: Dictionary = {
     interceptor: {
       label: 'Our projects',
       title: 'Interceptor drone.',
-      body: 'An AI interceptor that finds, tracks and destroys Shahed-type and other hostile drones.',
+      body: 'An AI interceptor that detects, identifies, tracks and destroys hostile UAVs.',
       specs: [
         { value: '200 km/h', label: 'Top speed' },
         { value: '5 km', label: 'Range' },
-        { value: '0 s', label: 'Launch readiness' },
-        { value: '2.5 kg', label: 'Mass' },
+        { value: '5 s', label: 'Launch readiness' },
+        { value: '2.5/3 kg', label: 'Mass' },
       ],
       cta: 'How it works',
       lock: { target: 'Shahed-type UAV', tracking: 'Tracking', locked: 'Target locked', destroyed: 'Target destroyed' },
@@ -78,17 +78,17 @@ const en: Dictionary = {
       label: 'C2 / C4',
       title: 'From detection to decision.',
       steps: [
-        { title: 'Detect', body: 'Sensors pick up an object and a track is created automatically.', status: 'Track created' },
-        { title: 'Classify', body: 'Computer vision and ML models suggest what it is and how certain they are.', status: 'Classified' },
-        { title: 'Confirm', body: 'The operator sees all the evidence in one place and makes the call.', status: 'Awaiting operator' },
-        { title: 'Respond', body: 'The command goes to the right device, from a camera to a jammer, and every step is logged.', status: 'Response assigned' },
+        { title: 'Detect', body: 'Data from different sensors is combined to identify the object or signal.', status: 'Track created' },
+        { title: 'Classify', body: 'Radio-protocol decoding and movement-pattern analysis with an ML model set the classification confidence for each object.', status: 'Classified' },
+        { title: 'Control', body: 'The operator receives a consolidated picture and the parameters of each object.', status: 'Under control' },
+        { title: 'Decision', body: 'In the same system interface, the operator applies countermeasures and follows how the situation develops.', status: 'Decision made' },
       ],
       closing: 'Machines handle the speed. People keep the authority.',
       confirm: 'Confirm',
     },
     field: {
       label: 'Engineering',
-      title: 'Designed for the conditions, not the demo.',
+      title: 'The system is deployed and operating across the Republic of Uzbekistan.',
       cards: [
         { title: 'Real-time', body: 'Streams are processed as they arrive, for work where seconds matter.' },
         { title: 'Resilient', body: 'Keeps operating on unstable links and degraded infrastructure.' },
@@ -113,7 +113,6 @@ const en: Dictionary = {
           tags: ['Energy', 'Transport', 'Industry and cities'],
         },
       ],
-      link: 'Explore solutions',
     },
     stack: {
       label: 'Technology',
@@ -129,9 +128,9 @@ const en: Dictionary = {
       link: 'All technologies',
     },
     epilogue: {
-      title: "Bring your devices. We'll bring the picture.",
-      body: "Tell us what you operate and where. We'll show you how it fits into one system.",
-      primary: 'Start a conversation',
+      title: 'We will secure control and safety of the airspace around your sites.',
+      body: 'State your requirements and the configuration of your infrastructure, and we will propose a solution.',
+      primary: 'Contact us',
       secondary: 'About Axionlab',
       partnersLabel: 'Working with',
     },
@@ -399,7 +398,7 @@ const en: Dictionary = {
       launch: {
         label: 'Launch',
         title: 'Coordinates in. Launch.',
-        body: 'Radar sends the target coordinates to the interceptor. The operator approves, and it flies to that point. Launch readiness: 0 s.',
+        body: 'Radar sends the target coordinates to the interceptor. The operator approves, and it flies to that point. Launch readiness: 5 s.',
       },
       seeker: {
         label: 'AI seeker',
@@ -421,8 +420,8 @@ const en: Dictionary = {
           { value: '5 km', label: 'Range' },
           { value: '< 5 min', label: 'Mission time' },
           { value: '< 10 min', label: 'Field deployment' },
-          { value: '0 s', label: 'Launch readiness' },
-          { value: '2.5 kg', label: 'Mass' },
+          { value: '5 s', label: 'Launch readiness' },
+          { value: '2.5/3 kg', label: 'Mass' },
           { value: 'Built-in', label: 'Kinetic warhead' },
         ],
       },
