@@ -22,6 +22,7 @@ export default defineConfig({
   integrations: [
     react(),
     sitemap({
+      filter: (page) => !page.includes('/projects/interceptor'),
       i18n: {
         defaultLocale: 'uz',
         locales: {

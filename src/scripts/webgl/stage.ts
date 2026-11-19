@@ -22,7 +22,7 @@ interface Keyframe {
 const KEYFRAMES: Keyframe[] = [
   { cam: [0, 8, 25], look: [0, -1.5, 2], opacity: 1, ping: 1 },
   { cam: [-9, 5.5, 20], look: [-1.6, -3.4, 2.3], opacity: 0.6, ping: 0, leave: 0.86 },
-  { cam: [-16, 6, 26], look: [-6, 2.5, 3], opacity: 0.6, ping: 0, leave: 0.86 },
+  // { cam: [-16, 6, 26], look: [-6, 2.5, 3], opacity: 0.6, ping: 0, leave: 0.86 },
   { cam: [2, 12, 18], look: [-3, -1, -5], opacity: 0.6, ping: 0, leave: 0.86 },
   { cam: [12, 10, 14], look: [2, 0, 0], opacity: 0.3, ping: 0.35 },
   { cam: [0, 14, 22], look: [0, 0, 0], opacity: 0.16, ping: 0.35 },

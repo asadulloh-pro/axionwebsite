@@ -3,7 +3,7 @@ import Layout from '../layouts/Layout.astro';
 import StoryRail from './story/StoryRail.astro';
 import Prologue from './story/Prologue.astro';
 import Problem from './story/Problem.astro';
-import Interceptor from './story/Interceptor.astro';
+// import Interceptor from './story/Interceptor.astro';
 import Nexus from './story/Nexus.astro';
 import Decide from './story/Decide.astro';
 import Field from './story/Field.astro';
@@ -35,7 +35,9 @@ const dict = getDictionary(locale);
   <div class="story" data-story>
     <Prologue dict={dict} />
     <Problem dict={dict} locale={locale} />
+    <!--
     <Interceptor dict={dict} locale={locale} />
+    -->
     <Nexus dict={dict} />
     <Decide dict={dict} />
     <Field dict={dict} />
@@ -43,7 +45,8 @@ const dict = getDictionary(locale);
     <Stack dict={dict} locale={locale} />
     <Epilogue dict={dict} locale={locale} />
   </div>
-  <StoryRail first={dict.story.rail[0]} total={dict.story.rail.length} />
+  <!-- rail[2] is the hidden interceptor chapter, so the visible count is one shorter. -->
+  <StoryRail first={dict.story.rail[0]} total={dict.story.rail.length - 1} />
 </Layout>
 
 <script>

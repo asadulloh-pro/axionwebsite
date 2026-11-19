@@ -1,0 +1,906 @@
+---
+import type { ProjectC2C4 } from '../../i18n/types';
+
+/*
+ * Four illustrative C4 screens under the chapter: zones on a map of Uzbekistan, people and
+ * authority, a jamming command for the selected zone, and detection statistics.
+ */
+interface Props {
+  ui: ProjectC2C4['c4screens'];
+  title: string;
+  live: string;
+  caption: string;
+}
+
+const { ui, title, live, caption } = Astro.props;
+const { zones, roles, suppress, stats } = ui;
+
+const alertAt = 3;
+const dayCounts = [8, 7, 9, 11, 12, 18, 11];
+const zoneCounts = [24, 16, 12, 10, 8, 6];
+const typeCounts = [47, 17, 12];
+const total = dayCounts.reduce((sum, n) => sum + n, 0);
+const dayMax = Math.max(...dayCounts);
+const zoneMax = Math.max(...zoneCounts);
+
+/* Simplified outline of Uzbekistan, with the six control zones. */
+const COUNTRY =
+  'M55.9 149.6 L71.7 108.7 L103.4 67.8 L154.8 45.1 L206.2 58.7 L253.6 95.1 L305.1 126.9 L360.4 104.2 L415.8 136 L463.3 167.8 L514.7 195.1 L550.3 167.8 L589.8 181.5 L617.5 201.9 L645.2 231.5 L676.8 247.4 L708.5 256.5 L736.1 265.5 L716.4 281.5 L682.7 295.1 L655.1 283.7 L629.4 272.4 L611.6 295.1 L583.9 317.8 L554.2 354.2 L524.6 404.2 L504.8 426.9 L471.2 417.8 L435.6 386 L400 356.5 L364.4 336 L316.9 317.8 L265.5 295.1 L218.1 265.5 L166.6 245.1 L115.2 220.1 L79.6 186 Z';
+
+const markers = [
+  { x: 579.5, y: 240.1, lx: 0, ly: -20, anchor: 'middle' },
+  { x: 489.4, y: 315.5, lx: 14, ly: -4, anchor: 'start' },
+  { x: 388.9, y: 310.1, lx: -16, ly: 4, anchor: 'end' },
+  { x: 502, y: 404, lx: 0, ly: -34, anchor: 'middle' },
+  { x: 198.7, y: 187.8, lx: 14, ly: 4, anchor: 'start' },
+  { x: 680, y: 281.9, lx: 0, ly: 24, anchor: 'middle' },
+];
+
+const initials = (name: string) =>
+  name
+    .split(' ')
+    .slice(0, 2)
+    .map((part) => part[0] ?? '')
+    .join('');
+---
+
+<div class="c4s">
+  <article class="c4s__block">
+    <header class="c4s__copy">
+      <p class="kicker">
+        <span class="kicker__idx">01</span>
+        <span class="kicker__rule" aria-hidden="true"></span>
+        <span>{zones.panel}</span>
+      </p>
+      <h3 class="c4s__title">{zones.title}</h3>
+      <p class="c4s__body">{zones.body}</p>
+    </header>
+
+    <figure class="c4s__screen" role="img" aria-label={`${zones.title}. ${zones.body}`}>
+      <header class="c4s__bar">
+        <span class="c4s__brand">{title}</span>
+        <span class="c4s__tab is-on">{zones.panel}</span>
+        <span class="c4s__live"><i></i>{live}</span>
+      </header>
+      <div class="c4s__map">
+        <svg viewBox="40 28 720 420" role="presentation">
+          <defs>
+            <radialGradient id="c4s-land" cx="0.55" cy="0.45" r="0.75">
+              <stop offset="0" stop-color="#162033" />
+              <stop offset="1" stop-color="#0b101b" />
+            </radialGradient>
+            <pattern id="c4s-grid" width="36" height="36" patternUnits="userSpaceOnUse">
+              <path d="M36 0H0V36" class="c4s__grid" />
+            </pattern>
+          </defs>
+          <rect x="40" y="28" width="720" height="420" fill="#080d16" />
+          <rect x="40" y="28" width="720" height="420" fill="url(#c4s-grid)" />
+          <path d={COUNTRY} fill="url(#c4s-land)" class="c4s__land" />
+          {markers.slice(1).map((m) => (
+            <line x1={markers[0].x} y1={markers[0].y} x2={m.x} y2={m.y} class="c4s__link" />
+          ))}
+          {markers.map((m, i) => (
+            <g class:list={[{ 'is-alert': i === alertAt }]}>
+              <circle cx={m.x} cy={m.y} r={i === alertAt ? 28 : 22} class="c4s__zone" />
+              <circle cx={m.x} cy={m.y} r="3.5" class="c4s__node" />
+              <text x={m.x + m.lx} y={m.y + m.ly} text-anchor={m.anchor} class="c4s__city">
+                {zones.places[i].city}
+              </text>
+            </g>
+          ))}
+        </svg>
+        <ul class="c4s__places">
+          {zones.places.map((place, i) => (
+            <li class:list={['c4s__place', { 'is-alert': i === alertAt }]}>
+              <span class="c4s__dot"></span>
+              <span>
+                <b>{place.city}</b>
+                <small>{place.zone}</small>
+              </span>
+              <span class="c4s__place-side">
+                <em>{place.nodes}</em>
+                {i === alertAt && <span class="c4s__flag">{zones.alert}</span>}
+              </span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </figure>
+  </article>
+
+  <article class="c4s__block">
+    <header class="c4s__copy">
+      <p class="kicker">
+        <span class="kicker__idx">02</span>
+        <span class="kicker__rule" aria-hidden="true"></span>
+        <span>{roles.panel}</span>
+      </p>
+      <h3 class="c4s__title">{roles.title}</h3>
+      <p class="c4s__body">{roles.body}</p>
+    </header>
+
+    <figure class="c4s__screen" role="img" aria-label={`${roles.title}. ${roles.body}`}>
+      <header class="c4s__bar">
+        <span class="c4s__brand">{title}</span>
+        <span class="c4s__tab is-on">{roles.panel}</span>
+        <span class="c4s__count">{roles.people.length}</span>
+        <span class="c4s__live"><i></i>{live}</span>
+      </header>
+      <div class="c4s__head">
+        <span>{roles.person}</span>
+        <span>{roles.role}</span>
+        <span>{roles.zones}</span>
+        <span>{roles.authority}</span>
+      </div>
+      <ul class="c4s__people">
+        {roles.people.map((person) => (
+          <li class="c4s__person">
+            <span class="c4s__who">
+              <i aria-hidden="true">{initials(person.name)}</i>
+              <b>{person.name}</b>
+            </span>
+            <span class:list={['c4s__role', { 'is-op': person.role === 'operator' }]}>
+              {person.role === 'operator' ? roles.operator : roles.observer}
+            </span>
+            <span class="c4s__zones">{person.zones}</span>
+            <span class:list={['c4s__auth', { 'is-op': person.role === 'operator' }]}>
+              {person.role === 'operator' ? roles.control : roles.viewOnly}
+            </span>
+          </li>
+        ))}
+      </ul>
+    </figure>
+  </article>
+
+  <article class="c4s__block">
+    <header class="c4s__copy">
+      <p class="kicker">
+        <span class="kicker__idx">03</span>
+        <span class="kicker__rule" aria-hidden="true"></span>
+        <span>{suppress.panel}</span>
+      </p>
+      <h3 class="c4s__title">{suppress.title}</h3>
+      <p class="c4s__body">{suppress.body}</p>
+    </header>
+
+    <figure class="c4s__screen" role="img" aria-label={`${suppress.title}. ${suppress.body}`}>
+      <header class="c4s__bar">
+        <span class="c4s__brand">{title}</span>
+        <span class="c4s__tab is-on">{suppress.panel}</span>
+        <span class="c4s__crumb">{suppress.zone}</span>
+        <span class="c4s__live"><i></i>{live}</span>
+      </header>
+      <div class="c4s__sup">
+        <ul class="c4s__picker">
+          <li class="c4s__picker-label">{suppress.selected}</li>
+          {zones.places.map((place, i) => (
+            <li class:list={[{ 'is-on': i === alertAt }]}>
+              <span class="c4s__dot"></span>
+              <span>
+                <b>{place.city}</b>
+                <small>{place.zone}</small>
+              </span>
+            </li>
+          ))}
+        </ul>
+        <div class="c4s__detect">
+          <p class="c4s__model">{suppress.model}</p>
+          <p class="c4s__id">ID 1581F6Q8D23</p>
+          <dl>
+            <div><dt>{suppress.confidence}</dt></div>
+            <div><dt>{suppress.alt}</dt></div>
+            <div><dt>{suppress.detected}</dt></div>
+          </dl>
+          <p class="c4s__device"><i></i>{suppress.device}</p>
+          <p class="c4s__bands">{suppress.bands}</p>
+        </div>
+        <div class="c4s__command">
+          <p class="c4s__ready"><i></i>{suppress.ready}</p>
+          <div class="c4s__jam">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="12" cy="12" r="2.2" />
+              <path d="M7.2 16.8a6.8 6.8 0 0 1 0-9.6M16.8 7.2a6.8 6.8 0 0 1 0 9.6M4.4 19.6a10.6 10.6 0 0 1 0-15.2M19.6 4.4a10.6 10.6 0 0 1 0 15.2" />
+            </svg>
+            <span>{suppress.button}</span>
+          </div>
+          <p class="c4s__hint">{suppress.hint}</p>
+        </div>
+      </div>
+    </figure>
+  </article>
+
+  <article class="c4s__block">
+    <header class="c4s__copy">
+      <p class="kicker">
+        <span class="kicker__idx">04</span>
+        <span class="kicker__rule" aria-hidden="true"></span>
+        <span>{stats.panel}</span>
+      </p>
+      <h3 class="c4s__title">{stats.title}</h3>
+      <p class="c4s__body">{stats.body}</p>
+    </header>
+
+    <figure class="c4s__screen" role="img" aria-label={`${stats.title}. ${stats.body}`}>
+      <header class="c4s__bar">
+        <span class="c4s__brand">{title}</span>
+        <span class="c4s__tab is-on">{stats.panel}</span>
+        <span class="c4s__crumb">{stats.period}</span>
+        <span class="c4s__live"><i></i>{live}</span>
+      </header>
+      <div class="c4s__stats">
+        <div class="c4s__panel">
+          <p class="c4s__label">
+            {stats.totalLabel}
+            <b>{total}</b>
+          </p>
+          <div class="c4s__week">
+            {dayCounts.map((count, i) => (
+              <div class:list={['c4s__day', { 'is-peak': count === dayMax }]}>
+                <span style={`--h:${count / dayMax}`}>{count}</span>
+                <small>{stats.days[i]}</small>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div class="c4s__panel">
+          <p class="c4s__label">{stats.byZone}</p>
+          <ul class="c4s__bars">
+            {stats.zoneNames.map((name, i) => (
+              <li>
+                <span>{name}</span>
+                <b>{zoneCounts[i]}</b>
+                <i style={`--w:${zoneCounts[i] / zoneMax}`}></i>
+              </li>
+            ))}
+          </ul>
+        </div>
+        <div class="c4s__panel c4s__panel--types">
+          <p class="c4s__label">{stats.byType}</p>
+          <ul class="c4s__types">
+            {stats.types.map((name, i) => (
+              <li>
+                <span>{name}</span>
+                <b>{typeCounts[i]}</b>
+                <i style={`--w:${typeCounts[i] / typeCounts[0]}`}></i>
+              </li>
+            ))}
+          </ul>
+          <div class="c4s__pattern">
+            <p>{stats.pattern}</p>
+            <span>{stats.patternBody}</span>
+          </div>
+        </div>
+      </div>
+    </figure>
+  </article>
+
+  <p class="c4s__caption hud">{caption}</p>
+</div>
+
+<style>
+  .c4s {
+    --pink: 214, 60, 232;
+    --green: 74, 222, 160;
+    --amber: 236, 178, 72;
+    --line: rgba(196, 210, 255, 0.12);
+    display: flex;
+    flex-direction: column;
+    gap: clamp(2.5rem, 5vw, 3.5rem);
+  }
+
+  .c4s__block {
+    display: grid;
+    gap: 1.25rem 2.5rem;
+    align-items: center;
+  }
+
+  .c4s__block + .c4s__block {
+    padding-top: clamp(2.5rem, 5vw, 3.5rem);
+    border-top: 1px solid var(--color-border);
+  }
+
+  .c4s__copy {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+  }
+
+  .c4s__copy::before {
+    content: '';
+    position: absolute;
+    inset: -1.5rem -1.25rem;
+    z-index: -1;
+    background: radial-gradient(closest-side, rgba(var(--rgb-bg), 0.92), rgba(var(--rgb-bg), 0.62) 70%, transparent);
+  }
+
+  .c4s__title {
+    margin: 0;
+    font-size: clamp(1.35rem, 2vw, 1.85rem);
+    font-weight: 440;
+    letter-spacing: -0.03em;
+    line-height: 1.15;
+  }
+
+  .c4s__body {
+    margin: 0;
+    max-width: 28rem;
+    color: var(--color-fg-muted);
+    font-size: 0.98rem;
+    line-height: 1.55;
+  }
+
+  .c4s__screen {
+    margin: 0;
+    overflow: hidden;
+    border: 1px solid rgba(196, 210, 255, 0.16);
+    background: #080d16;
+    box-shadow: 0 28px 70px rgba(0, 0, 0, 0.42);
+  }
+
+  .c4s__bar {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    min-height: 2.4rem;
+    padding: 0.4rem 0.8rem;
+    border-bottom: 1px solid var(--line);
+    background: #0b1220;
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgba(var(--rgb-fg), 0.62);
+  }
+
+  .c4s__brand {
+    color: var(--color-fg);
+    letter-spacing: 0.14em;
+  }
+
+  .c4s__tab.is-on {
+    padding: 0.15rem 0.45rem;
+    border: 1px solid rgba(var(--rgb-accent), 0.5);
+    color: var(--color-accent-soft);
+  }
+
+  .c4s__crumb {
+    color: rgba(var(--rgb-fg), 0.8);
+  }
+
+  .c4s__count {
+    color: var(--color-fg);
+  }
+
+  .c4s__live {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-left: auto;
+    color: var(--color-accent-soft);
+  }
+
+  .c4s__live i,
+  .c4s__dot,
+  .c4s__device i,
+  .c4s__ready i {
+    width: 0.45rem;
+    height: 0.45rem;
+    border-radius: 999px;
+    background: currentColor;
+    flex: none;
+  }
+
+  .c4s__live i {
+    animation: c4s-blink 1.6s steps(2, jump-none) infinite;
+  }
+
+  @keyframes c4s-blink {
+    50% {
+      opacity: 0.25;
+    }
+  }
+
+  .c4s__map {
+    display: grid;
+  }
+
+  .c4s__map svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    min-height: 16rem;
+  }
+
+  .c4s__grid {
+    fill: none;
+    stroke: rgba(196, 210, 255, 0.05);
+  }
+
+  .c4s__land {
+    stroke: rgba(196, 210, 255, 0.45);
+    stroke-width: 1.4;
+  }
+
+  .c4s__link {
+    stroke: rgba(var(--rgb-accent), 0.28);
+    stroke-dasharray: 3 4;
+  }
+
+  .c4s__zone {
+    fill: rgba(var(--rgb-accent), 0.1);
+    stroke: rgba(var(--rgb-accent), 0.7);
+    stroke-width: 1.2;
+  }
+
+  .is-alert .c4s__zone {
+    fill: rgba(var(--pink), 0.16);
+    stroke: rgb(var(--pink));
+  }
+
+  .c4s__node {
+    fill: rgb(var(--green));
+  }
+
+  .is-alert .c4s__node {
+    fill: rgb(var(--pink));
+  }
+
+  .c4s__city {
+    fill: #f5f7fc;
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: 13px;
+    letter-spacing: 0.04em;
+    paint-order: stroke;
+    stroke: #080d16;
+    stroke-width: 4px;
+  }
+
+  .c4s__places,
+  .c4s__people,
+  .c4s__picker {
+    list-style: none;
+    margin: 0;
+    padding: 0.35rem 0;
+  }
+
+  .c4s__place,
+  .c4s__picker li {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    gap: 0.55rem;
+    align-items: center;
+    padding: 0.45rem 0.85rem;
+  }
+
+  .c4s__place.is-alert,
+  .c4s__picker li.is-on {
+    background: rgba(var(--pink), 0.1);
+  }
+
+  .c4s__dot {
+    color: rgb(var(--green));
+  }
+
+  .is-alert .c4s__dot,
+  .is-on .c4s__dot {
+    color: rgb(var(--pink));
+  }
+
+  .c4s__place b,
+  .c4s__picker b,
+  .c4s__who b {
+    display: block;
+    font-weight: 520;
+    letter-spacing: -0.01em;
+  }
+
+  .c4s__place small,
+  .c4s__picker small {
+    display: block;
+    color: rgba(var(--rgb-fg), 0.55);
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .c4s__place-side {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.2rem;
+  }
+
+  .c4s__place em {
+    font-style: normal;
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    color: rgba(var(--rgb-fg), 0.7);
+  }
+
+  .c4s__flag {
+    padding: 0.05rem 0.35rem;
+    background: rgba(var(--pink), 0.2);
+    color: rgb(var(--pink));
+    font-family: var(--font-mono);
+    font-size: 0.62rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .c4s__head,
+  .c4s__person {
+    display: grid;
+    grid-template-columns: minmax(0, 1.35fr) minmax(6.5rem, 0.7fr) minmax(0, 1.15fr) minmax(6.5rem, 0.7fr);
+    gap: 0.75rem;
+    align-items: center;
+    padding: 0.7rem 0.9rem;
+  }
+
+  .c4s__head {
+    color: rgba(var(--rgb-fg), 0.45);
+    font-family: var(--font-mono);
+    font-size: 0.64rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .c4s__person + .c4s__person {
+    border-top: 1px solid var(--line);
+  }
+
+  .c4s__who {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    min-width: 0;
+  }
+
+  .c4s__who i {
+    display: grid;
+    place-items: center;
+    width: 1.9rem;
+    height: 1.9rem;
+    border: 1px solid rgba(var(--rgb-accent), 0.45);
+    background: rgba(var(--rgb-accent), 0.14);
+    font-family: var(--font-mono);
+    font-style: normal;
+    font-size: 0.62rem;
+    letter-spacing: 0.04em;
+  }
+
+  .c4s__role,
+  .c4s__auth {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: rgba(var(--rgb-fg), 0.72);
+  }
+
+  .c4s__role.is-op,
+  .c4s__auth.is-op {
+    color: var(--color-accent-soft);
+  }
+
+  .c4s__zones {
+    color: rgba(var(--rgb-fg), 0.78);
+  }
+
+  .c4s__sup,
+  .c4s__stats {
+    display: grid;
+  }
+
+  .c4s__picker {
+    border-bottom: 1px solid var(--line);
+  }
+
+  .c4s__picker-label {
+    display: block;
+    padding: 0.65rem 0.85rem 0.2rem;
+    color: rgba(var(--rgb-fg), 0.45);
+    font-family: var(--font-mono);
+    font-size: 0.64rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .c4s__detect,
+  .c4s__command,
+  .c4s__panel {
+    padding: 0.9rem 1rem 1rem;
+  }
+
+  .c4s__model {
+    margin: 0;
+    font-size: 1.05rem;
+    letter-spacing: -0.02em;
+  }
+
+  .c4s__id {
+    margin: 0.2rem 0 0.75rem;
+    color: rgba(var(--rgb-fg), 0.5);
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+  }
+
+  .c4s__detect dl {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin: 0;
+  }
+
+  .c4s__detect dt {
+    padding: 0.2rem 0.45rem;
+    border: 1px solid var(--line);
+    color: rgba(var(--rgb-fg), 0.8);
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+  }
+
+  .c4s__device,
+  .c4s__bands,
+  .c4s__ready,
+  .c4s__hint {
+    margin: 0.75rem 0 0;
+    font-size: 0.82rem;
+  }
+
+  .c4s__device {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    color: rgb(var(--green));
+  }
+
+  .c4s__bands {
+    color: rgba(var(--rgb-fg), 0.55);
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+  }
+
+  .c4s__command {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 0.8rem;
+    background: rgba(var(--pink), 0.04);
+  }
+
+  .c4s__ready {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    color: rgb(var(--amber));
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .c4s__jam {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.7rem;
+    min-height: 3.4rem;
+    border: 1px solid rgba(var(--pink), 0.85);
+    background: rgba(var(--pink), 0.22);
+    color: #fff;
+    font-size: 1rem;
+    letter-spacing: 0.04em;
+  }
+
+  .c4s__jam svg {
+    width: 1.35rem;
+    height: 1.35rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.6;
+  }
+
+  .c4s__hint {
+    color: rgba(var(--rgb-fg), 0.62);
+    font-size: 0.78rem;
+    line-height: 1.4;
+  }
+
+  .c4s__label {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin: 0 0 0.85rem;
+    color: rgba(var(--rgb-fg), 0.55);
+    font-family: var(--font-mono);
+    font-size: 0.66rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .c4s__label b {
+    color: var(--color-fg);
+    font-size: 1.35rem;
+    font-weight: 460;
+    letter-spacing: -0.03em;
+  }
+
+  .c4s__week {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 0.4rem;
+    align-items: end;
+    height: 9.5rem;
+  }
+
+  .c4s__day {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 0.35rem;
+    height: 100%;
+  }
+
+  .c4s__day span {
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    width: 100%;
+    height: calc(var(--h) * 78%);
+    min-height: 1.3rem;
+    padding-top: 0.25rem;
+    background: rgba(var(--rgb-accent), 0.45);
+    color: #fff;
+    font-family: var(--font-mono);
+    font-size: 0.62rem;
+  }
+
+  .c4s__day.is-peak span {
+    background: rgba(var(--pink), 0.75);
+  }
+
+  .c4s__day small {
+    color: rgba(var(--rgb-fg), 0.5);
+    font-family: var(--font-mono);
+    font-size: 0.62rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .c4s__bars,
+  .c4s__types {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+  }
+
+  .c4s__bars li,
+  .c4s__types li {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 0.15rem 0.6rem;
+    align-items: center;
+  }
+
+  .c4s__bars span,
+  .c4s__types span {
+    grid-row: 1;
+    color: rgba(var(--rgb-fg), 0.82);
+    font-size: 0.82rem;
+  }
+
+  .c4s__bars b,
+  .c4s__types b {
+    grid-row: 1;
+    font-family: var(--font-mono);
+    font-weight: 450;
+    font-size: 0.72rem;
+    color: rgba(var(--rgb-fg), 0.7);
+  }
+
+  .c4s__bars i,
+  .c4s__types i {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    height: 0.28rem;
+    width: calc(var(--w) * 100%);
+    background: rgba(var(--rgb-accent), 0.7);
+  }
+
+  .c4s__bars li:first-child i,
+  .c4s__types li:first-child i {
+    background: rgba(var(--pink), 0.8);
+  }
+
+  .c4s__pattern {
+    margin-top: 1rem;
+    padding: 0.75rem 0.8rem;
+    border: 1px solid rgba(var(--amber), 0.45);
+    background: rgba(var(--amber), 0.08);
+  }
+
+  .c4s__pattern p {
+    margin: 0 0 0.3rem;
+    color: rgb(var(--amber));
+    font-family: var(--font-mono);
+    font-size: 0.64rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .c4s__pattern span {
+    color: rgba(var(--rgb-fg), 0.86);
+    font-size: 0.84rem;
+    line-height: 1.45;
+  }
+
+  .c4s__caption {
+    margin: 0;
+    text-align: right;
+  }
+
+  @media (min-width: 760px) {
+    .c4s__map {
+      grid-template-columns: minmax(0, 1.45fr) minmax(13rem, 0.7fr);
+    }
+
+    .c4s__places {
+      border-left: 1px solid var(--line);
+    }
+
+    .c4s__sup {
+      grid-template-columns: minmax(10rem, 0.8fr) minmax(0, 1.15fr) minmax(11rem, 0.9fr);
+    }
+
+    .c4s__picker,
+    .c4s__detect {
+      border-bottom: 0;
+      border-right: 1px solid var(--line);
+    }
+
+    .c4s__stats {
+      grid-template-columns: 1.15fr 1fr 0.95fr;
+    }
+
+    .c4s__panel + .c4s__panel {
+      border-left: 1px solid var(--line);
+    }
+  }
+
+  @media (min-width: 980px) {
+    .c4s__block {
+      grid-template-columns: minmax(15rem, 21rem) minmax(0, 1fr);
+    }
+  }
+
+  @media (max-width: 719px) {
+    .c4s__head {
+      display: none;
+    }
+
+    .c4s__person {
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 0.35rem 0.75rem;
+    }
+
+    .c4s__zones,
+    .c4s__auth {
+      grid-column: 1 / -1;
+    }
+
+    .c4s__bar {
+      gap: 0.45rem;
+      letter-spacing: 0.04em;
+    }
+
+    .c4s__crumb {
+      display: none;
+    }
+  }
+</style>

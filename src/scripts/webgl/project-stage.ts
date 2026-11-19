@@ -9,7 +9,7 @@ import { createTerrainPoints, easeInOutCubic } from './terrain-points';
  *   1 site     the devices of the first site rise one by one, then its dome
  *   2 c2       the site streams its data into the field laptop ([data-screen])
  *   3 network  the camera pulls back while more protected sites rise across the relief
- *   4 c4       every dome streams into the command center video wall ([data-wall])
+ *   4 c4       the camera pulls back over the network. The chapter shows the C4 screens in HTML.
  */
 
 interface Keyframe {

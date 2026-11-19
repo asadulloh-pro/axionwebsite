@@ -4,7 +4,7 @@ import ClosingCTA from '../ClosingCTA.astro';
 import ChapterIntro from '../story/ChapterIntro.astro';
 import StoryRail from '../story/StoryRail.astro';
 import C2Screen from './C2Screen.astro';
-import C4Wall from './C4Wall.astro';
+import C4Screens from './C4Screens.astro';
 import { getDictionary, type Locale } from '../../i18n';
 import { localizePath } from '../../lib/paths';
 
@@ -57,7 +57,7 @@ const breadcrumb = {
       <div class="container-axion chapter__stage">
         <div class="pj-intro__copy">
           <a class="pj-back hud" href={`${localizePath('', locale)}#problem`}>← {dict.nav.home}</a>
-          <ChapterIntro id="pj-title" index={0} label={page.intro.label} title={page.intro.title} body={page.intro.body} as="h1" size="lg" />
+          <ChapterIntro id="pj-title" index={0} label={page.intro.label} title={page.intro.title} as="h1" size="lg" />
         </div>
         <span class="pj-intro__cue hud" aria-hidden="true">{page.intro.scrollCue} ↓</span>
       </div>
@@ -128,22 +128,12 @@ const breadcrumb = {
       </div>
     </section>
 
-    <section
-      id="c4"
-      class="chapter pj-c4"
-      data-chapter
-      data-pin
-      data-length="3.2"
-      data-rail={page.rail[4]}
-      aria-labelledby="pj-c4-title"
-    >
+    <section id="c4" class="chapter pj-c4" data-chapter data-rail={page.rail[4]} aria-labelledby="pj-c4-title">
       <div class="container-axion chapter__stage pj-c4__stage">
         <div class="pj-c4__copy">
           <ChapterIntro id="pj-c4-title" index={4} label={page.c4.label} title={page.c4.title} body={page.c4.body} />
         </div>
-        <div class="pj-device pj-device--room">
-          <C4Wall ui={page.c4ui} devices={page.c2ui.devices} caption={page.caption} />
-        </div>
+        <C4Screens ui={page.c4screens} title={page.c4ui.title} live={page.c4ui.live} caption={page.caption} />
       </div>
     </section>
   </div>
@@ -266,25 +256,16 @@ const breadcrumb = {
   .pj-c4__stage {
     flex-direction: column;
     align-items: stretch;
-    justify-content: center;
-    gap: 2rem;
+    justify-content: flex-start;
+    gap: clamp(2.75rem, 6vw, 4.5rem);
   }
 
-  .pj-device--room {
-    width: 100%;
+  .pj-c4__copy {
+    max-width: 46rem;
   }
 
-  /* Narrow screens crop the room around the wall so the C4 picture stays legible. */
-  @media (max-width: 899px) {
-    .pj-device--room {
-      overflow: hidden;
-    }
-
-    .pj-device--room :global(.c4w__room) {
-      width: 136%;
-      margin-left: -18%;
-      margin-top: -12%;
-    }
+  .pj-c4 :global(.headline) {
+    font-size: clamp(1.9rem, 3.2vw, 3rem);
   }
 
   @media (min-width: 900px) {
@@ -354,45 +335,5 @@ const breadcrumb = {
       transform-origin: left center;
     }
 
-    .pj-c4__stage {
-      display: grid;
-      grid-template-columns: minmax(0, 0.55fr) minmax(0, 1.45fr);
-      align-items: center;
-    }
-
-    .pj-c4 :global(.headline) {
-      font-size: clamp(1.8rem, 2.6vw, 2.6rem);
-    }
-
-    /* Pinned, the room sits high so the domes on the relief below can stream up into the wall. */
-    .pj-c4.is-pinned .pj-c4__stage {
-      grid-template-rows: auto 1fr;
-      align-items: start;
-      padding-top: 5.5rem;
-    }
-
-    /* Once every site is online the camera pushes into the wall (read by C4Wall as --c4-zoom). */
-    .pj-c4.is-pinned {
-      --c4-zoom-t: clamp(0, (var(--p) - 0.55) / 0.1, 1);
-      --c4-zoom: calc(var(--c4-zoom-t) * var(--c4-zoom-t) * (3 - 2 * var(--c4-zoom-t)));
-      overflow: clip;
-    }
-
-    .pj-c4.is-pinned .pj-c4__copy {
-      grid-area: 2 / 1;
-      align-self: end;
-      max-width: 24rem;
-      opacity: calc(1 - var(--c4-zoom));
-      transform: translateY(calc(var(--c4-zoom) * 1.5rem));
-    }
-
-    .pj-c4.is-pinned .pj-device--room {
-      --in: clamp(0, var(--p) * 6, 1);
-      grid-area: 1 / 1 / 2 / 3;
-      width: min(100%, calc(50vh * 1.78));
-      justify-self: end;
-      opacity: var(--in);
-      transform: translateY(calc((1 - var(--in)) * -2rem)) scale(calc(0.95 + var(--in) * 0.05));
-    }
   }
 </style>

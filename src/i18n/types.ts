@@ -142,7 +142,7 @@ export interface ProjectC2C4 {
   metaDescription: string;
   breadcrumb: string;
   rail: string[];
-  intro: StoryBeat & { scrollCue: string };
+  intro: Omit<StoryBeat, 'body'> & { scrollCue: string };
   site: StoryBeat;
   c2: StoryBeat;
   network: StoryBeat;
@@ -216,6 +216,63 @@ export interface ProjectC2C4 {
     devicesLabel: string;
     /** Story steps shown under the wall: sites, detection, incident, hand-off */
     steps: string[];
+  };
+  /** Four C4 product screens shown under the chapter: zones, roles, suppression, statistics. */
+  c4screens: {
+    zones: {
+      title: string;
+      body: string;
+      panel: string;
+      alert: string;
+      /** City, zone name and node count, in map order: Tashkent, Samarkand, Bukhara, Termez, Nukus, Fergana */
+      places: { city: string; zone: string; nodes: string }[];
+    };
+    roles: {
+      title: string;
+      body: string;
+      panel: string;
+      person: string;
+      role: string;
+      zones: string;
+      authority: string;
+      observer: string;
+      operator: string;
+      viewOnly: string;
+      control: string;
+      people: { name: string; role: 'observer' | 'operator'; zones: string }[];
+    };
+    suppress: {
+      title: string;
+      body: string;
+      panel: string;
+      selected: string;
+      zone: string;
+      model: string;
+      confidence: string;
+      alt: string;
+      detected: string;
+      device: string;
+      ready: string;
+      button: string;
+      hint: string;
+      bands: string;
+    };
+    stats: {
+      title: string;
+      body: string;
+      panel: string;
+      period: string;
+      totalLabel: string;
+      byZone: string;
+      byType: string;
+      pattern: string;
+      patternBody: string;
+      days: string[];
+      /** Quadcopter, fixed-wing, unidentified */
+      types: string[];
+      /** Same order as the sample counts: border post, airfield, HQ, substation, bridge, depot */
+      zoneNames: string[];
+    };
   };
   caption: string;
 }
